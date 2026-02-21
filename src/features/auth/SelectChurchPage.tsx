@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Church as ChurchIcon, Loader2, ChevronRight } from "lucide-react";
+import {
+  Church as ChurchIcon,
+  Loader2,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { churchesApi } from "@/lib/api";
 import type { Church } from "@/types";
 
@@ -33,6 +39,26 @@ function SelectChurchPage() {
     return (
       <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (churches.length <= 1) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center px-6">
+        <ChurchIcon className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+        <h1 className="text-xl font-bold">현재 소속된 교회가 하나뿐이에요</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          다른 교회에 가입하면 여기서 전환할 수 있어요
+        </p>
+        <Button
+          variant="outline"
+          className="mt-6"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          돌아가기
+        </Button>
       </div>
     );
   }

@@ -5,13 +5,13 @@ import type {
   GatheringDetail,
   GatheringResponse,
   Group,
+  JoinRequest,
   LoginRequest,
   LoginResponse,
   SignupRequest,
   SignupResponse,
   User,
 } from "@/types";
-import { checkAndHandleJwtExpired } from "./auth-handler";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -46,14 +46,12 @@ async function authedFetch<T>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const apiError = new ApiError(
+    throw new ApiError(
       (errorData as Record<string, string>).message ||
         `HTTP ${response.status}`,
       response.status,
       errorData
     );
-    checkAndHandleJwtExpired(apiError);
-    throw apiError;
   }
 
   const text = await response.text();
@@ -83,11 +81,11 @@ export const authApi = {
     if (data.accessToken) {
       const provisioned = (data as LoginResponse & { isProvisioned?: boolean })
         .isProvisioned;
-      if (provisioned === false) {
-        localStorage.setItem("authToken", data.accessToken);
-      } else if (provisioned === true) {
+      if (provisioned === true) {
         localStorage.setItem("provisionToken", data.accessToken);
         localStorage.setItem("provisionPending", "true");
+      } else {
+        localStorage.setItem("authToken", data.accessToken);
       }
     }
 
@@ -140,6 +138,24 @@ export const authApi = {
   isAuthenticated: (): boolean => !!localStorage.getItem("authToken"),
 
   getToken: (): string | null => localStorage.getItem("authToken"),
+
+  checkPhoneAvailability: async (phone: string): Promise<boolean> => {
+    const response = await fetch(
+      `${API_BASE_URL}/auth/availability/phone?value=${encodeURIComponent(phone)}`
+    );
+    if (!response.ok) throw new ApiError(`HTTP ${response.status}`, response.status);
+    const data: { available: boolean } = await response.json();
+    return data.available;
+  },
+
+  checkEmailAvailability: async (email: string): Promise<boolean> => {
+    const response = await fetch(
+      `${API_BASE_URL}/auth/availability/email?value=${encodeURIComponent(email)}`
+    );
+    if (!response.ok) throw new ApiError(`HTTP ${response.status}`, response.status);
+    const data: { available: boolean } = await response.json();
+    return data.available;
+  },
 };
 
 export const membersApi = {
@@ -187,6 +203,32 @@ export const churchesApi = {
     authedFetch<{ count: number }>(
       `/churches/${churchId}/prayer-request-count`
     ),
+
+  getAllChurches: () => authedFetch<Church[]>("/churches/all"),
+
+  getBirthdayMembers: (churchId: string, month: number) =>
+    authedFetch<Array<{ memberId: string; name: string; birthday: string; sex: "M" | "F" | null }>>(
+      `/churches/${churchId}/birthday-members?month=${month}`
+    ),
+
+  requestRegistration: (churchId: string) =>
+    authedFetch<JoinRequest>(`/churches/${churchId}/join-request`, {
+      method: "POST",
+    }),
+
+  getMyJoinRequests: () =>
+    authedFetch<JoinRequest[]>("/churches/join-request/status"),
+
+  hasPendingRequest: async (): Promise<boolean> => {
+    try {
+      const requests = await authedFetch<JoinRequest[]>(
+        "/churches/join-request/status"
+      );
+      return requests.some((r) => r.status === "PENDING");
+    } catch {
+      return false;
+    }
+  },
 };
 
 export const groupsApi = {
@@ -263,6 +305,30 @@ export const gatheringsApi = {
       method: "PATCH",
       body: JSON.stringify(updateData),
     }),
+};
+
+export const messagesApi = {
+  send: (receiverId: string, content: string, type: string) =>
+    authedFetch<{ id: string; senderName: string; content: string; type: string; isRead: boolean; createdAt: string }>("/messages", {
+      method: "POST",
+      body: JSON.stringify({ receiverId, content, type }),
+    }),
+
+  getMyMessages: () =>
+    authedFetch<Array<{ id: string; senderName: string; receiverName: string; content: string; type: string; isRead: boolean; createdAt: string }>>(
+      "/messages"
+    ),
+
+  getSentMessages: () =>
+    authedFetch<Array<{ id: string; senderName: string; receiverName: string; content: string; type: string; isRead: boolean; createdAt: string }>>(
+      "/messages/sent"
+    ),
+
+  getUnreadCount: () =>
+    authedFetch<{ count: number }>("/messages/unread-count"),
+
+  markAsRead: (messageId: string) =>
+    authedFetch<void>(`/messages/${messageId}/read`, { method: "PATCH" }),
 };
 
 export const prayersApi = {

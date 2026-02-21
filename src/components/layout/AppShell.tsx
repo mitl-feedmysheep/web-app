@@ -26,7 +26,7 @@ function AppShell() {
         <Outlet />
       </main>
       {showBottomNav && <BottomNav />}
-      <Toaster position="top-center" richColors />
+      <Toaster position="top-center" richColors duration={2000} />
     </div>
   );
 }

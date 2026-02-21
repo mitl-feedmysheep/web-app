@@ -99,7 +99,6 @@ export interface GatheringDetail {
     entityType: string;
     entityId: string;
     url: string;
-    accessURL: string;
     createdAt: string;
   }>;
 }
@@ -137,4 +136,12 @@ export interface SignupRequest {
 export interface SignupResponse {
   memberId: string;
   message: string;
+}
+
+export interface JoinRequest {
+  id: string;
+  churchId: string;
+  churchName: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  createdAt: string;
 }

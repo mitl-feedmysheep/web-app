@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronLeft,
+  ChevronRight,
   ChevronDown,
   ChevronUp,
   Calendar,
@@ -19,8 +20,19 @@ import {
   Loader2,
   Pencil,
   Check,
+  Camera,
+  X,
+  BookOpen,
 } from "lucide-react";
-import { gatheringsApi, groupsApi, prayersApi, ApiError } from "@/lib/api";
+import { gatheringsApi, groupsApi, prayersApi, mediaApi, ApiError } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { convertKSTtoUTC, formatWeekFormat } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -51,6 +63,10 @@ function GatheringDetailPage() {
   const [viewMode, setViewMode] = useState<"full" | "prayer">("full");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [deletingMediaId, setDeletingMediaId] = useState<string | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const canEdit =
     myInfo?.role === "LEADER" || myInfo?.role === "SUB_LEADER";
@@ -113,6 +129,13 @@ function GatheringDetailPage() {
     load();
   }, [gatheringId, groupId]);
 
+  useEffect(() => {
+    if (previewIndex !== null) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [previewIndex]);
+
   const handleMeetingChange = (field: string, value: string) => {
     setMeetingForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -166,6 +189,78 @@ function GatheringDetailPage() {
       setSavingMeeting(false);
     }
   };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !gathering) return;
+    e.target.value = "";
+
+    try {
+      setUploadingPhoto(true);
+      for (const file of Array.from(files)) {
+        const { uploads } = await mediaApi.getPresignedUrls(
+          "GATHERING",
+          gathering.id,
+          file.name,
+          file.type,
+          file.size
+        );
+        await Promise.all(
+          uploads.map((u) => mediaApi.uploadFile(u.uploadUrl, file))
+        );
+        const result = await mediaApi.completeUpload(
+          "GATHERING",
+          gathering.id,
+          uploads.map((u) => ({ mediaType: u.mediaType, publicUrl: u.publicUrl }))
+        );
+        const newMedias = result.medias.map((m) => ({
+          id: m.mediaId,
+          mediaType: m.mediaType as "THUMBNAIL" | "MEDIUM",
+          entityType: "GATHERING",
+          entityId: gathering.id,
+          url: m.publicUrl,
+          createdAt: m.createdAt,
+        }));
+        setGathering((prev) =>
+          prev ? { ...prev, medias: [...(prev.medias || []), ...newMedias] } : prev
+        );
+      }
+      toast.success(`${files.length}장의 사진이 업로드되었습니다`);
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "사진 업로드에 실패했습니다."
+      );
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleDeletePhoto = async (mediaId: string) => {
+    if (!gathering) return;
+    try {
+      setDeletingMediaId(mediaId);
+      await mediaApi.deleteMediaById(mediaId);
+      setGathering((prev) =>
+        prev
+          ? { ...prev, medias: (prev.medias || []).filter((m) => m.id !== mediaId) }
+          : prev
+      );
+      toast.success("사진이 삭제되었습니다");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "사진 삭제에 실패했습니다."
+      );
+    } finally {
+      setDeletingMediaId(null);
+      setDeleteTargetId(null);
+    }
+  };
+
+
+
+  const mediumPhotos = (gathering?.medias || []).filter(
+    (m) => m.mediaType === "MEDIUM"
+  );
 
   if (loading || !gathering) {
     return (
@@ -301,6 +396,14 @@ function GatheringDetailPage() {
                   </span>
                 </div>
               )}
+              {gathering.adminComment && (
+                <div className="flex items-center gap-2.5 text-sm">
+                  <BookOpen className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-muted-foreground">
+                    {gathering.adminComment}
+                  </span>
+                </div>
+              )}
               {canEdit && (
                 <Button
                   variant="outline"
@@ -316,6 +419,138 @@ function GatheringDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* ── Photo Gallery ── */}
+      <div className="space-y-2">
+
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide">
+          {mediumPhotos.map((media, idx) => (
+            <div
+              key={media.id}
+              className="relative shrink-0"
+            >
+              <img
+                src={media.url}
+                alt=""
+                className="h-28 w-28 cursor-pointer rounded-xl object-cover"
+                onClick={() => setPreviewIndex(idx)}
+              />
+              {canEdit && (
+                <button
+                  onClick={() => setDeleteTargetId(media.id)}
+                  disabled={deletingMediaId === media.id}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/40 text-white"
+                >
+                  {deletingMediaId === media.id ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <X className="h-3 w-3" strokeWidth={2.5} />
+                  )}
+                </button>
+              )}
+            </div>
+          ))}
+          {canEdit && (
+            <label className="flex h-28 w-28 shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/60 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePhotoUpload}
+                disabled={uploadingPhoto}
+              />
+              {uploadingPhoto ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <>
+                  <Camera className="mb-1 h-6 w-6" />
+                  <span className="text-xs">추가</span>
+                </>
+              )}
+            </label>
+          )}
+        </div>
+      </div>
+
+      {/* ── Delete Confirmation Modal ── */}
+      <Dialog open={deleteTargetId !== null} onOpenChange={(open) => { if (!open) setDeleteTargetId(null); }}>
+        <DialogContent showCloseButton={false} className="max-w-[280px]">
+          <DialogHeader>
+            <DialogTitle className="sr-only">삭제 확인</DialogTitle>
+            <DialogDescription className="text-center text-base text-foreground">
+              이 사진을 삭제하시겠습니까?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setDeleteTargetId(null)}
+            >
+              취소
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              disabled={deletingMediaId !== null}
+              onClick={() => {
+                if (deleteTargetId) handleDeletePhoto(deleteTargetId);
+              }}
+            >
+              {deletingMediaId ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : null}
+              삭제
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Photo Preview ── */}
+      {previewIndex !== null && mediumPhotos[previewIndex] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewIndex(null); }}
+        >
+          <button
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white"
+            onClick={() => setPreviewIndex(null)}
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          {previewIndex > 0 && (
+            <button
+              className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
+              onClick={() => setPreviewIndex(previewIndex - 1)}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+
+          {previewIndex < mediumPhotos.length - 1 && (
+            <button
+              className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
+              onClick={() => setPreviewIndex(previewIndex + 1)}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
+
+          <div className="absolute bottom-4 z-10 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white">
+            <span>{previewIndex + 1}</span>
+            <span className="text-white/50"> / {mediumPhotos.length}</span>
+          </div>
+
+          <img
+            src={mediumPhotos[previewIndex].url}
+            alt=""
+            className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+            style={{ WebkitTouchCallout: "default" } as React.CSSProperties}
+          />
+        </div>
+      )}
 
       {/* ── View Toggle ── */}
       <div className="flex items-center justify-between">
@@ -443,23 +678,23 @@ function AttendanceChip({
       disabled={disabled || isLoading}
       onClick={() => onChange(!checked)}
       className={cn(
-        "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-all",
+        "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-all",
         checked ? "bg-muted text-foreground" : "text-muted-foreground",
         (disabled || isLoading) && "opacity-40 cursor-not-allowed"
       )}
     >
       {isLoading ? (
-        <Loader2 className="h-3 w-3 animate-spin" />
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <div
           className={cn(
-            "flex h-3.5 w-3.5 items-center justify-center rounded transition-colors",
+            "flex h-4.5 w-4.5 items-center justify-center rounded transition-colors",
             checked ? "bg-primary" : "bg-muted-foreground/20"
           )}
         >
           {checked && (
             <Check
-              className="h-2.5 w-2.5 text-primary-foreground"
+              className="h-3 w-3 text-primary-foreground"
               strokeWidth={3}
             />
           )}

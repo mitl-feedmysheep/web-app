@@ -35,7 +35,12 @@ function LoginPage() {
       const churches = await churchesApi.getMyChurches();
 
       if (churches.length === 0) {
-        setError("소속된 교회가 없습니다. 관리자에게 문의하세요.");
+        const hasPending = await churchesApi.hasPendingRequest();
+        if (hasPending) {
+          navigate("/pending-approval", { replace: true });
+        } else {
+          navigate("/request-church", { replace: true });
+        }
         return;
       }
 
