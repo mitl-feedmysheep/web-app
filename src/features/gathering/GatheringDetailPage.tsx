@@ -68,6 +68,7 @@ function GatheringDetailPage() {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
+  const isLeader = myInfo?.role === "LEADER";
   const canEdit =
     myInfo?.role === "LEADER" || myInfo?.role === "SUB_LEADER";
 
@@ -191,13 +192,14 @@ function GatheringDetailPage() {
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !gathering) return;
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0 || !gathering) return;
+    const files = Array.from(fileList);
     e.target.value = "";
 
     try {
       setUploadingPhoto(true);
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         const { uploads } = await mediaApi.getPresignedUrls(
           "GATHERING",
           gathering.id,
@@ -205,25 +207,19 @@ function GatheringDetailPage() {
           file.type,
           file.size
         );
-        await Promise.all(
-          uploads.map((u) => mediaApi.uploadFile(u.uploadUrl, file))
-        );
-        const result = await mediaApi.completeUpload(
+        const mediumUpload = uploads.find((u) => u.mediaType === "MEDIUM");
+        if (!mediumUpload) throw new Error("MEDIUM upload URL not found");
+
+        await mediaApi.uploadFile(mediumUpload.uploadUrl, file);
+
+        await mediaApi.completeUpload(
           "GATHERING",
           gathering.id,
-          uploads.map((u) => ({ mediaType: u.mediaType, publicUrl: u.publicUrl }))
+          [{ mediaType: mediumUpload.mediaType, publicUrl: mediumUpload.publicUrl }]
         );
-        const newMedias = result.medias.map((m) => ({
-          id: m.mediaId,
-          mediaType: m.mediaType as "THUMBNAIL" | "MEDIUM",
-          entityType: "GATHERING",
-          entityId: gathering.id,
-          url: m.publicUrl,
-          createdAt: m.createdAt,
-        }));
-        setGathering((prev) =>
-          prev ? { ...prev, medias: [...(prev.medias || []), ...newMedias] } : prev
-        );
+
+        const updated = await gatheringsApi.getDetail(gathering.id);
+        setGathering(updated);
       }
       toast.success(`${files.length}장의 사진이 업로드되었습니다`);
     } catch (err) {
@@ -336,17 +332,19 @@ function GatheringDetailPage() {
                   className="h-9"
                 />
               </div>
-              <div className="flex items-center gap-2.5">
-                <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
-                <Input
-                  value={meetingForm.leaderComment}
-                  onChange={(e) =>
-                    handleMeetingChange("leaderComment", e.target.value)
-                  }
-                  placeholder="리더 코멘트"
-                  className="h-9"
-                />
-              </div>
+              {isLeader && (
+                <div className="flex items-center gap-2.5">
+                  <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
+                  <Input
+                    value={meetingForm.leaderComment}
+                    onChange={(e) =>
+                      handleMeetingChange("leaderComment", e.target.value)
+                    }
+                    placeholder="리더 코멘트"
+                    className="h-9"
+                  />
+                </div>
+              )}
               <Button
                 onClick={handleSaveMeeting}
                 disabled={savingMeeting}
@@ -388,7 +386,7 @@ function GatheringDetailPage() {
                   </span>
                 </div>
               )}
-              {gathering.leaderComment && (
+              {isLeader && gathering.leaderComment && (
                 <div className="flex items-center gap-2.5 text-sm">
                   <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
                   <span className="text-muted-foreground">
@@ -396,11 +394,11 @@ function GatheringDetailPage() {
                   </span>
                 </div>
               )}
-              {gathering.adminComment && (
+              {isLeader && (
                 <div className="flex items-center gap-2.5 text-sm">
                   <BookOpen className="h-4 w-4 shrink-0 text-primary" />
                   <span className="text-muted-foreground">
-                    {gathering.adminComment}
+                    {(gathering.adminComment || "").trim() || "목회자 코멘트"}
                   </span>
                 </div>
               )}

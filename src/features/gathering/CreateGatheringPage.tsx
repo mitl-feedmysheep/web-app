@@ -20,7 +20,10 @@ function CreateGatheringPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
 
   const [form, setForm] = useState({
     date: today,
@@ -86,6 +89,7 @@ function CreateGatheringPage() {
               type="date"
               value={form.date}
               onChange={(e) => handleChange("date", e.target.value)}
+              className="h-9 w-44"
             />
           </div>
 

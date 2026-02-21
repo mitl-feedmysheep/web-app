@@ -360,6 +360,7 @@ export const mediaApi = {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", uploadUrl, true);
       xhr.withCredentials = false;
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
       xhr.onload = () =>
         xhr.status >= 200 && xhr.status < 300
           ? resolve()
