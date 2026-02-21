@@ -431,6 +431,7 @@ function GatheringDetailPage() {
                 src={media.url}
                 alt=""
                 className="h-28 w-28 cursor-pointer rounded-xl object-cover"
+                crossOrigin="anonymous"
                 onClick={() => setPreviewIndex(idx)}
               />
               {canEdit && (
@@ -545,6 +546,7 @@ function GatheringDetailPage() {
             src={mediumPhotos[previewIndex].url}
             alt=""
             className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+            crossOrigin="anonymous"
             style={{ WebkitTouchCallout: "default" } as React.CSSProperties}
           />
         </div>

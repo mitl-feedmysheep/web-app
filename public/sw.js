@@ -1,5 +1,5 @@
-const STATIC_CACHE_NAME = 'intotheheaven-static-v1'
-const DYNAMIC_CACHE_NAME = 'intotheheaven-dynamic-v1'
+const STATIC_CACHE_NAME = 'intotheheaven-static-v2'
+const DYNAMIC_CACHE_NAME = 'intotheheaven-dynamic-v2'
 
 const STATIC_ASSETS = [
   '/',
@@ -41,6 +41,11 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event
   const url = new URL(request.url)
+
+  // Skip cross-origin requests (e.g., R2 media URLs) — let the browser handle them directly
+  if (url.origin !== self.location.origin) {
+    return
+  }
 
   if (request.headers.get('Accept')?.includes('text/html')) {
     event.respondWith(handlePageRequest(request))
