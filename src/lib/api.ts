@@ -55,7 +55,7 @@ async function authedFetch<T>(
   }
 
   const text = await response.text();
-  return text ? JSON.parse(text) : undefined;
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export const authApi = {

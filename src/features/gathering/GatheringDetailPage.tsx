@@ -828,7 +828,7 @@ function MemberCard({
       );
       onUpdate({
         ...member,
-        story: story.trim() || null,
+        story: story.trim() || "",
         goal: res.goal ?? goal,
         prayers: res.prayers,
       });
