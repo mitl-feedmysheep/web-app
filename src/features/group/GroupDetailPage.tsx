@@ -17,6 +17,7 @@ import {
   Users,
   Loader2,
   ChevronLeft,
+  Settings,
 } from "lucide-react";
 import { groupsApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -91,13 +92,25 @@ function GroupDetailPage() {
 
   return (
     <div className="space-y-6 px-4 py-4">
-      <button
-        onClick={() => navigate("/groups")}
-        className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        소그룹
-      </button>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate("/groups")}
+          className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          소그룹
+        </button>
+
+        {isLeader && (
+          <button
+            onClick={() => navigate(`/groups/${groupId}/manage`)}
+            className="flex items-center gap-1 text-sm text-primary/70 transition-colors hover:text-primary"
+          >
+            <Settings className="h-4 w-4" />
+            관리
+          </button>
+        )}
+      </div>
 
       <section className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pt-1 pb-1">
         {members.map((m) => (

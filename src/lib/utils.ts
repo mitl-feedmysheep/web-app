@@ -47,6 +47,70 @@ export function formatWeekFormat(dateString: string): string {
   }
 }
 
+export function resizeImage(
+  file: File,
+  targetWidth: number,
+  targetHeight: number,
+  quality: number = 0.9
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    const objectUrl = URL.createObjectURL(file);
+    img.src = objectUrl;
+
+    const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+    img.onload = () => {
+      cleanup();
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      if (!ctx) {
+        reject(new Error("Canvas context not available"));
+        return;
+      }
+
+      ctx.fillStyle = "#F5F7F5";
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+      const imgAspect = img.width / img.height;
+      const targetAspect = targetWidth / targetHeight;
+
+      let drawWidth = targetWidth;
+      let drawHeight = targetHeight;
+      let drawX = 0;
+      let drawY = 0;
+
+      if (imgAspect > targetAspect) {
+        drawHeight = targetWidth / imgAspect;
+        drawY = (targetHeight - drawHeight) / 2;
+      } else {
+        drawWidth = targetHeight * imgAspect;
+        drawX = (targetWidth - drawWidth) / 2;
+      }
+
+      ctx.drawImage(img, 0, 0, img.width, img.height, drawX, drawY, drawWidth, drawHeight);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Failed to create blob from canvas"));
+        },
+        file.type,
+        quality
+      );
+    };
+
+    img.onerror = () => {
+      cleanup();
+      reject(new Error("Failed to load image"));
+    };
+  });
+}
+
 export const storage = {
   get: (key: string) => {
     try {

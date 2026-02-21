@@ -87,7 +87,7 @@ function HomePage() {
           </h2>
           <button
             type="button"
-            className="relative shrink-0 p-1.5 text-muted-foreground hover:text-primary transition-colors"
+            className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
             onClick={() => navigate("/messages")}
           >
             <Mail className="h-5 w-5" />
@@ -130,9 +130,16 @@ function HomePage() {
       </section>
 
       <section>
-        <div className="mb-2 flex items-center gap-2">
-          <Cake className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">{currentMonth}월 생일자 ({birthdays.length}명)</h3>
+        <div className="mb-2 flex items-baseline justify-between">
+          <div className="flex items-center gap-2">
+            <Cake className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">{currentMonth}월 생일자 ({birthdays.length}명)</h3>
+          </div>
+          {birthdays.length > 0 && (
+            <span className="flex items-center gap-0.5 pr-1 text-[11px] text-muted-foreground">
+              아래의 <MessageSquareHeart className="inline h-3 w-3 text-pink-400" />을 눌러 생일을 축하해주세요!
+            </span>
+          )}
         </div>
 
         {birthdays.length > 0 ? (

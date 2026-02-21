@@ -19,6 +19,7 @@ import MyPage from "@/features/my/MyPage";
 import AccountPage from "@/features/my/AccountPage";
 import ChangePasswordPage from "@/features/my/ChangePasswordPage";
 import MessagesPage from "@/features/messages/MessagesPage";
+import GroupManagePage from "@/features/group/GroupManagePage";
 
 function isSplashEnabled(): boolean {
   const raw = String(import.meta.env.VITE_IS_SPLASH_ON ?? "true").toLowerCase();
@@ -61,6 +62,7 @@ function App() {
             <Route path="/messages" element={<MessagesPage />} />
 
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
+            <Route path="/groups/:groupId/manage" element={<GroupManagePage />} />
             <Route
               path="/groups/:groupId/gathering/:gatheringId"
               element={<GatheringDetailPage />}
