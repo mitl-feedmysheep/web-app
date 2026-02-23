@@ -23,6 +23,10 @@ export interface User {
   birthday: string;
   phone: string;
   profileUrl: string;
+  address?: string;
+  occupation?: string;
+  baptismStatus?: "BAPTIZED" | "NOT_BAPTIZED" | "PAEDOBAPTISM" | null;
+  mbti?: string;
   role?: string;
 }
 

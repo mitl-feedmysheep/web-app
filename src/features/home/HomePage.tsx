@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
 import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail } from "lucide-react";
 import { membersApi, churchesApi, messagesApi } from "@/lib/api";
 import type { User } from "@/types";
 import SendMessageModal from "./SendMessageModal";
+import MiniCalendar from "./MiniCalendar";
 
 interface BirthdayMember {
   memberId: string;
@@ -16,7 +16,6 @@ interface BirthdayMember {
 function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [birthdays, setBirthdays] = useState<BirthdayMember[]>([]);
-  const [prayerCount, setPrayerCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -53,13 +52,6 @@ function HomePage() {
         setBirthdays(birthdayMembers);
       } catch {
         setBirthdays([]);
-      }
-
-      try {
-        const { count } = await churchesApi.getPrayerRequestCount(churchId);
-        setPrayerCount(count);
-      } catch {
-        setPrayerCount(0);
       }
 
       setLoading(false);
@@ -101,22 +93,6 @@ function HomePage() {
         <p className="mt-1 text-sm text-muted-foreground">
           오늘도 하나님의 은혜 안에서 좋은 하루 되세요
         </p>
-      </section>
-
-      <section>
-        <Card className="border-0 bg-primary/5 shadow-none">
-          <CardContent className="flex items-center gap-4 py-4">
-            <span className="text-2xl shrink-0">🙏</span>
-            <div>
-              <span className="text-2xl font-bold text-primary">
-                총 {prayerCount.toLocaleString()}개
-              </span>
-              <p className="text-xs text-muted-foreground">
-                우리 교회에 쌓인 기도제목
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       <section>
@@ -239,6 +215,8 @@ function HomePage() {
           </p>
         )}
       </section>
+
+      <MiniCalendar />
 
       <SendMessageModal
         open={!!messageTarget}

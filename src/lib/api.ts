@@ -189,6 +189,10 @@ export const membersApi = {
     sex: "M" | "F";
     birthday: string;
     phone: string;
+    address?: string;
+    occupation?: string;
+    baptismStatus?: string;
+    mbti?: string;
   }) =>
     authedFetch<User>("/members/me", {
       method: "PATCH",
@@ -229,6 +233,11 @@ export const churchesApi = {
       return false;
     }
   },
+
+  getGroupsWithLeaders: (churchId: string) =>
+    authedFetch<
+      Array<{ groupId: string; groupName: string; leaderName: string | null }>
+    >(`/churches/${churchId}/groups-with-leaders`),
 };
 
 export const groupsApi = {
@@ -411,4 +420,21 @@ export const mediaApi = {
 
   deleteMediaByEntityId: (entityId: string) =>
     authedFetch<void>(`/media/entity/${entityId}`, { method: "DELETE" }),
+};
+
+export interface EventItem {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  startTime?: string; // HH:mm:ss
+  endTime?: string;
+  location?: string;
+}
+
+export const eventsApi = {
+  getByMonth: (entityId: string, entityType: string, year: number, month: number) =>
+    authedFetch<EventItem[]>(
+      `/events?entityId=${entityId}&entityType=${entityType}&year=${year}&month=${month}`,
+    ),
 };

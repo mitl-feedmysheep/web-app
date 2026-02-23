@@ -18,7 +18,6 @@ function PrayerPage() {
     const load = async () => {
       try {
         const data = await prayersApi.getMyPrayers();
-        console.log(data);
         setPrayers(data);
       } catch (err) {
         toast.error(
@@ -86,13 +85,12 @@ function PrayerPage() {
   }
 
   return (
-    <div className="space-y-5 px-4 py-4 pb-8">
+    <div className="space-y-5 px-4 py-6 pb-8">
       {/* Header */}
       <div>
         <h1 className="text-lg font-bold">나의 기도제목</h1>
         <p className="mt-1 text-[9.5px] text-muted-foreground/70 leading-relaxed">
           그들이 부르기 전에 내가 응답하겠고 그들이 말을 마치기 전에 내가 들을 것이며 (이사야 65:24)
-          {/* <span className="block text-right text-[10px] mt-0.5 not-italic">(이사야 65:24)</span> */}
         </p>
       </div>
 

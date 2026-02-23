@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Loader2 } from "lucide-react";
-import { groupsApi } from "@/lib/api";
+import { groupsApi, churchesApi } from "@/lib/api";
 import type { Group } from "@/types";
+
+interface GroupLeaderInfo {
+  groupId: string;
+  groupName: string;
+  leaderName: string | null;
+}
 
 function GroupListPage() {
   const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[]>([]);
+  const [allGroups, setAllGroups] = useState<GroupLeaderInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,8 +22,12 @@ function GroupListPage() {
       try {
         const churchId = localStorage.getItem("churchId");
         if (!churchId) return;
-        const data = await groupsApi.getGroupsByChurch(churchId);
-        setGroups(data);
+        const [myGroups, churchGroups] = await Promise.all([
+          groupsApi.getGroupsByChurch(churchId),
+          churchesApi.getGroupsWithLeaders(churchId),
+        ]);
+        setGroups(myGroups);
+        setAllGroups(churchGroups);
       } catch {
         // silently handle
       } finally {
@@ -36,8 +47,37 @@ function GroupListPage() {
 
   return (
     <div className="space-y-4 px-4 py-6">
+      <h1 className="text-lg font-bold">소그룹</h1>
+
+      {allGroups.length > 0 && (
+        <div className="rounded-xl border border-border/60 bg-card p-3.5">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold">
+              우리 교회 소모임 {allGroups.length}개
+            </span>
+          </div>
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {allGroups.map((g) => (
+              <div
+                key={g.groupId}
+                className="flex w-[calc(50%-3px)] items-center gap-1.5 rounded-full bg-accent/60 px-2.5 py-1"
+              >
+                <span className="text-xs font-medium truncate">{g.groupName}</span>
+                {g.leaderName && (
+                  <span className="flex items-center gap-1 shrink-0">
+                    <span className="text-[11px] text-muted-foreground">{g.leaderName}</span>
+                    <span className="rounded-sm bg-primary/15 px-1 py-px text-[9px] font-semibold leading-normal text-primary translate-y-px">리더</span>
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <p className="text-sm text-muted-foreground">
-        내가 속한 소그룹 {groups.length}개
+        나의 소그룹 {groups.length}개
       </p>
 
       {groups.map((group) => (
