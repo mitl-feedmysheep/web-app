@@ -339,7 +339,6 @@ export const prayersApi = {
         prayerRequest: string;
         description: string | null;
         isAnswered: boolean;
-        createdAt: string;
         groupName: string | null;
         gatheringDate: string | null;
       }>

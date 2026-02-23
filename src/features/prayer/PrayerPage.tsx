@@ -1,24 +1,24 @@
 import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, CheckCircle2, Circle } from "lucide-react";
 import { prayersApi, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { MyPrayer } from "@/types";
 
-type FilterType = "praying" | "answered" | null;
+type FilterType = "all" | "praying" | "answered";
 
 function PrayerPage() {
   const [prayers, setPrayers] = useState<MyPrayer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         const data = await prayersApi.getMyPrayers();
+        console.log(data);
         setPrayers(data);
       } catch (err) {
         toast.error(
@@ -34,8 +34,11 @@ function PrayerPage() {
   }, []);
 
   const handleFilterClick = (type: FilterType) => {
-    setFilter((prev) => (prev === type ? null : type));
+    setFilter(type);
   };
+
+  const prayingCount = prayers.filter((p) => !p.isAnswered).length;
+  const answeredCount = prayers.filter((p) => p.isAnswered).length;
 
   const handleToggleAnswered = useCallback(
     async (prayer: MyPrayer) => {
@@ -69,7 +72,7 @@ function PrayerPage() {
   const filteredPrayers = prayers.filter((p) => {
     if (filter === "praying") return !p.isAnswered;
     if (filter === "answered") return p.isAnswered;
-    return true;
+    return true; // "all"
   });
 
   const grouped = groupByMonth(filteredPrayers);
@@ -85,37 +88,36 @@ function PrayerPage() {
   return (
     <div className="space-y-5 px-4 py-4 pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="text-lg font-bold">나의 기도제목</h1>
-        <span className="text-sm text-muted-foreground">
-          총 {prayers.length}개
-        </span>
+        <p className="mt-1 text-[9.5px] text-muted-foreground/70 leading-relaxed">
+          그들이 부르기 전에 내가 응답하겠고 그들이 말을 마치기 전에 내가 들을 것이며 (이사야 65:24)
+          {/* <span className="block text-right text-[10px] mt-0.5 not-italic">(이사야 65:24)</span> */}
+        </p>
       </div>
 
       {/* Filter Chips */}
       <div className="flex gap-2">
-        <button
-          onClick={() => handleFilterClick("praying")}
-          className={cn(
-            "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-            filter === "praying"
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
-          )}
-        >
-          기도 중
-        </button>
-        <button
-          onClick={() => handleFilterClick("answered")}
-          className={cn(
-            "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-            filter === "answered"
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
-          )}
-        >
-          응답됨
-        </button>
+        {(
+          [
+            { type: "all" as FilterType, label: "전체", count: prayers.length },
+            { type: "praying" as FilterType, label: "기도 중", count: prayingCount },
+            { type: "answered" as FilterType, label: "응답됨", count: answeredCount },
+          ] as const
+        ).map(({ type, label, count }) => (
+          <button
+            key={type}
+            onClick={() => handleFilterClick(type)}
+            className={cn(
+              "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              filter === type
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            )}
+          >
+            {label}({count}개)
+          </button>
+        ))}
       </div>
 
       {/* Prayer List */}
@@ -157,49 +159,47 @@ function PrayerCard({
   toggling: boolean;
   onToggle: (prayer: MyPrayer) => void;
 }) {
-  const createdDate = formatDateOnly(prayer.createdAt);
   const context = buildContext(prayer);
 
   return (
     <Card
       className={cn(
-        "border-0 shadow-none transition-opacity",
-        prayer.isAnswered ? "bg-accent/40" : "bg-accent/60"
+        "border shadow-none transition-all",
+        prayer.isAnswered
+          ? "border-primary/25 bg-primary/5"
+          : "border-transparent bg-accent/60"
       )}
     >
       <CardContent className="py-3">
         <div className="flex items-start gap-3">
-          <div className="pt-0.5">
-            <Checkbox
-              checked={prayer.isAnswered}
-              onCheckedChange={() => onToggle(prayer)}
-              disabled={toggling}
-              className="h-5 w-5 rounded-full"
-            />
-          </div>
+          <button
+            onClick={() => onToggle(prayer)}
+            disabled={toggling}
+            className="mt-0.5 shrink-0 cursor-pointer transition-colors"
+          >
+            {prayer.isAnswered ? (
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            ) : (
+              <Circle className="h-6 w-6 text-muted-foreground/40" />
+            )}
+          </button>
           <div className="min-w-0 flex-1 space-y-1">
-            <p
-              className={cn(
-                "text-sm font-medium leading-snug",
-                prayer.isAnswered && "text-muted-foreground line-through"
-              )}
-            >
+            <p className="text-sm font-medium leading-snug">
               {prayer.prayerRequest}
+              {prayer.isAnswered && (
+                <span className="ml-1.5 inline-flex items-center align-middle rounded-full bg-primary/15 px-1.5 py-px text-[10px] font-semibold text-primary leading-none">
+                  응답됨
+                </span>
+              )}
             </p>
             {prayer.description && (
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {prayer.description}
               </p>
             )}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/70">
-              {context && (
-                <>
-                  <span>{context}</span>
-                  <span>·</span>
-                </>
-              )}
-              <span>{createdDate}</span>
-            </div>
+            {context && (
+              <p className="text-xs text-muted-foreground/70">{context}</p>
+            )}
           </div>
         </div>
       </CardContent>
@@ -223,11 +223,6 @@ function EmptyState({ type }: { type: "all" | "filtered" }) {
   );
 }
 
-function formatDateOnly(isoString: string): string {
-  const d = new Date(isoString);
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
-}
-
 function buildContext(prayer: MyPrayer): string | null {
   if (!prayer.groupName) return null;
   if (prayer.gatheringDate) {
@@ -242,12 +237,26 @@ interface MonthGroup {
   items: MyPrayer[];
 }
 
+function getGatheringDateKey(prayer: MyPrayer): string {
+  if (prayer.gatheringDate) {
+    const d = new Date(prayer.gatheringDate + "T00:00:00");
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+  return "0000-00";
+}
+
+function getGatheringTimestamp(prayer: MyPrayer): number {
+  if (prayer.gatheringDate) {
+    return new Date(prayer.gatheringDate + "T00:00:00").getTime();
+  }
+  return 0;
+}
+
 function groupByMonth(prayers: MyPrayer[]): MonthGroup[] {
   const map = new Map<string, MyPrayer[]>();
 
   for (const prayer of prayers) {
-    const d = new Date(prayer.createdAt);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const key = getGatheringDateKey(prayer);
     const existing = map.get(key);
     if (existing) {
       existing.push(prayer);
@@ -256,13 +265,19 @@ function groupByMonth(prayers: MyPrayer[]): MonthGroup[] {
     }
   }
 
-  return Array.from(map.entries()).map(([key, items]) => {
-    const [year, month] = key.split("-");
-    return {
-      label: `${year}년 ${parseInt(month)}월`,
-      items,
-    };
-  });
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, items]) => {
+      items.sort((a, b) => getGatheringTimestamp(b) - getGatheringTimestamp(a));
+      if (key === "0000-00") {
+        return { label: "기타", items };
+      }
+      const [year, month] = key.split("-");
+      return {
+        label: `${year}년 ${parseInt(month)}월`,
+        items,
+      };
+    });
 }
 
 export default PrayerPage;
