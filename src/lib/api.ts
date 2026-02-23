@@ -427,8 +427,8 @@ export interface EventItem {
   title: string;
   description?: string;
   date: string; // YYYY-MM-DD
-  startTime?: string; // HH:mm:ss
-  endTime?: string;
+  startTime?: unknown; // string "HH:mm" or array [H, M] depending on backend serialization
+  endTime?: unknown;
   location?: string;
 }
 

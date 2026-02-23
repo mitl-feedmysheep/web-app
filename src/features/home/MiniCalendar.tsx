@@ -13,11 +13,24 @@ interface CalendarEvent {
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-function formatTime(t?: string): string | undefined {
+function normalizeTime(raw: unknown): string | undefined {
+  if (!raw) return undefined;
+  if (Array.isArray(raw)) {
+    const [h = 0, m = 0] = raw;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+  if (typeof raw === "string") return raw;
+  return undefined;
+}
+
+function formatTime(raw: unknown): string | undefined {
+  const t = normalizeTime(raw);
   if (!t) return undefined;
-  const [h, m] = t.split(":");
-  const hour = parseInt(h, 10);
-  const minute = m || "00";
+  const parts = t.split(":");
+  const hour = parseInt(parts[0], 10);
+  const minute = parts[1] || "00";
+  if (isNaN(hour)) return t;
+  if (hour === 0) return `오전 12:${minute}`;
   if (hour < 12) return `오전 ${hour}:${minute}`;
   if (hour === 12) return `오후 12:${minute}`;
   return `오후 ${hour - 12}:${minute}`;
@@ -25,10 +38,14 @@ function formatTime(t?: string): string | undefined {
 
 function toCalendarEvent(ev: EventItem): CalendarEvent {
   let time: string | undefined;
-  if (ev.startTime && ev.endTime) {
-    time = `${formatTime(ev.startTime)} - ${formatTime(ev.endTime)}`;
-  } else if (ev.startTime) {
-    time = formatTime(ev.startTime);
+  try {
+    if (ev.startTime && ev.endTime) {
+      time = `${formatTime(ev.startTime)} - ${formatTime(ev.endTime)}`;
+    } else if (ev.startTime) {
+      time = formatTime(ev.startTime);
+    }
+  } catch {
+    // time formatting failed — show event without time
   }
 
   return {
@@ -89,15 +106,13 @@ function MiniCalendar() {
     return map;
   }, [events]);
 
-  const upcomingEvents = useMemo(() => {
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const monthEvents = useMemo(() => {
     const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
 
     return events
-      .filter((ev) => ev.date >= todayStr && ev.date.startsWith(monthStr))
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, 4);
-  }, [events, year, month, today]);
+      .filter((ev) => ev.date.startsWith(monthStr))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [events, year, month]);
 
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
@@ -207,24 +222,26 @@ function MiniCalendar() {
           })}
         </div>
 
-        {/* Upcoming events list */}
-        {upcomingEvents.length > 0 && (
+        {/* Monthly events list */}
+        {monthEvents.length > 0 && (
           <div className="mt-2.5 space-y-1.5 border-t border-border/50 pt-2.5">
             <span className="text-[10px] font-medium text-muted-foreground">
-              다가오는 일정
+              {month + 1}월 일정
             </span>
-            {upcomingEvents.map((ev) => {
+            {monthEvents.map((ev) => {
               const evDate = new Date(ev.date + "T00:00:00");
               const dayLabel = `${evDate.getMonth() + 1}/${evDate.getDate()}`;
+              const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+              const isPast = evDate < todayStart;
               return (
                 <button
                   key={ev.id}
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50"
+                  className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50 ${isPast ? "opacity-45" : ""}`}
                   onClick={() => setSelectedEvent(ev)}
                 >
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium">
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${isPast ? "bg-muted-foreground" : "bg-primary"}`} />
+                  <span className={`min-w-0 flex-1 truncate text-xs font-medium ${isPast ? "text-muted-foreground" : ""}`}>
                     {ev.title}
                   </span>
                   <span className="shrink-0 text-[10px] text-muted-foreground">
@@ -240,11 +257,11 @@ function MiniCalendar() {
       {/* Event detail overlay */}
       {selectedEvent && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 px-6"
           onClick={() => setSelectedEvent(null)}
         >
           <div
-            className="w-full max-w-sm animate-in slide-in-from-bottom-4 rounded-t-2xl bg-card p-5 shadow-xl sm:rounded-2xl"
+            className="w-full max-w-sm animate-in fade-in zoom-in-95 rounded-2xl bg-card p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-start justify-between">
