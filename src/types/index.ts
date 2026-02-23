@@ -123,6 +123,16 @@ export interface Prayer {
   answered: boolean;
 }
 
+export interface MyPrayer {
+  id: string;
+  prayerRequest: string;
+  description: string | null;
+  isAnswered: boolean;
+  createdAt: string;
+  groupName: string | null;
+  gatheringDate: string | null;
+}
+
 export interface SignupRequest {
   password: string;
   name: string;

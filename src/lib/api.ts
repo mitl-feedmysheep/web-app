@@ -332,6 +332,25 @@ export const messagesApi = {
 };
 
 export const prayersApi = {
+  getMyPrayers: () =>
+    authedFetch<
+      Array<{
+        id: string;
+        prayerRequest: string;
+        description: string | null;
+        isAnswered: boolean;
+        createdAt: string;
+        groupName: string | null;
+        gatheringDate: string | null;
+      }>
+    >("/prayers/me"),
+
+  updateAnswered: (prayerId: string, isAnswered: boolean) =>
+    authedFetch<void>(`/prayers/${prayerId}/answered`, {
+      method: "PATCH",
+      body: JSON.stringify({ isAnswered }),
+    }),
+
   delete: (prayerId: string) =>
     authedFetch<void>(`/prayers/${prayerId}`, { method: "DELETE" }),
 };
