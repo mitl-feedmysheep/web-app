@@ -386,11 +386,11 @@ function GatheringDetailPage() {
                   </span>
                 </div>
               )}
-              {isLeader && gathering.leaderComment && (
+              {isLeader && (
                 <div className="flex items-center gap-2.5 text-sm">
                   <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
                   <span className="text-muted-foreground">
-                    {gathering.leaderComment}
+                    {(gathering.leaderComment || "").trim() || "리더 코멘트"}
                   </span>
                 </div>
               )}
