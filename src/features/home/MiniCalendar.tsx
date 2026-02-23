@@ -280,7 +280,7 @@ function MiniCalendar() {
 
             <div className="space-y-2 text-sm">
               {selectedEvent.description && (
-                <p className="text-foreground/80">
+                <p className="whitespace-pre-line text-foreground/80">
                   {selectedEvent.description}
                 </p>
               )}
