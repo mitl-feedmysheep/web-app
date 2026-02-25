@@ -4,12 +4,9 @@
   "description": "교회 소그룹의 기도와 나눔을 기록하는 영적 동행 앱",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
+  "background_color": "#ffffff",
   "theme_color": "#5F7B6D",
   "orientation": "portrait",
-  "scope": "/",
-  "lang": "ko",
-  "categories": ["lifestyle", "utilities", "social"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -22,20 +19,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "새 모임 만들기",
-      "short_name": "새 모임",
-      "description": "새로운 소그룹 모임을 시작합니다",
-      "url": "/",
-      "icons": [
-        {
-          "src": "/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ]
 }
