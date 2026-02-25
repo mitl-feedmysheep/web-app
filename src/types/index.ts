@@ -40,15 +40,42 @@ export interface Church {
   createdAt: string;
 }
 
+export type GroupType = "NORMAL" | "NEWCOMER";
+
 export interface Group {
   id: string;
   name: string;
   description: string;
   churchId: string;
+  type: GroupType;
   startDate: string;
   endDate: string;
   groupMemberCount: number;
   imageUrl?: string;
+}
+
+export interface EducationProgram {
+  id: string;
+  groupId: string;
+  name: string;
+  description: string;
+  totalWeeks: number;
+  graduatedCount: number;
+  memberProgress: EducationMemberProgress[];
+}
+
+export interface EducationMemberProgress {
+  groupMemberId: string;
+  completedWeeks: number[];
+  completedCount: number;
+}
+
+export interface EducationProgress {
+  id: string;
+  groupMemberId: string;
+  gatheringId: string;
+  weekNumber: number;
+  completedDate: string;
 }
 
 export interface Gathering {

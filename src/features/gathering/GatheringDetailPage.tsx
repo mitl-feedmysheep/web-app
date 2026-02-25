@@ -24,7 +24,7 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
-import { gatheringsApi, groupsApi, prayersApi, mediaApi, ApiError } from "@/lib/api";
+import { gatheringsApi, groupsApi, prayersApi, mediaApi, educationApi, ApiError } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,7 @@ import {
 import { convertKSTtoUTC, formatWeekFormat } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import type { GatheringDetail, GatheringMember, User } from "@/types";
+import type { GatheringDetail, GatheringMember, User, EducationProgram, EducationProgress } from "@/types";
 
 function GatheringDetailPage() {
   const { groupId, gatheringId } = useParams<{
@@ -47,6 +47,8 @@ function GatheringDetailPage() {
 
   const [gathering, setGathering] = useState<GatheringDetail | null>(null);
   const [myInfo, setMyInfo] = useState<User | null>(null);
+  const [educationProgram, setEducationProgram] = useState<EducationProgram | null>(null);
+  const [gatheringProgress, setGatheringProgress] = useState<EducationProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [editingMeeting, setEditingMeeting] = useState(false);
@@ -121,6 +123,16 @@ function GatheringDetailPage() {
           description: (detail.description || "").trim(),
           leaderComment: (detail.leaderComment || "").trim(),
         });
+        try {
+          const [program, progress] = await Promise.all([
+            educationApi.getProgram(groupId),
+            educationApi.getProgressByGathering(gatheringId),
+          ]);
+          setEducationProgram(program);
+          setGatheringProgress(progress);
+        } catch {
+          // No education program for this group
+        }
       } catch {
         toast.error("모임 정보를 불러오지 못했습니다.");
       } finally {
@@ -606,6 +618,45 @@ function GatheringDetailPage() {
                 updatingMemberId !== null &&
                 updatingMemberId !== member.memberId
               }
+              educationProgram={educationProgram}
+              gatheringProgress={gatheringProgress}
+              onEducationToggle={async (groupMemberId, weekNumber, progressId) => {
+                if (!gatheringId) return;
+                try {
+                  if (progressId) {
+                    await educationApi.removeProgress(gatheringId, progressId);
+                    setGatheringProgress(prev => prev.filter(p => p.id !== progressId));
+                    if (educationProgram) {
+                      setEducationProgram({
+                        ...educationProgram,
+                        memberProgress: educationProgram.memberProgress.map(mp =>
+                          mp.groupMemberId === groupMemberId
+                            ? { ...mp, completedWeeks: mp.completedWeeks.filter(w => w !== weekNumber), completedCount: mp.completedCount - 1 }
+                            : mp
+                        ),
+                      });
+                    }
+                  } else {
+                    const result = await educationApi.recordProgress(gatheringId, { groupMemberId, weekNumber });
+                    setGatheringProgress(prev => [...prev, result]);
+                    if (educationProgram) {
+                      const existing = educationProgram.memberProgress.find(mp => mp.groupMemberId === groupMemberId);
+                      setEducationProgram({
+                        ...educationProgram,
+                        memberProgress: existing
+                          ? educationProgram.memberProgress.map(mp =>
+                              mp.groupMemberId === groupMemberId
+                                ? { ...mp, completedWeeks: [...mp.completedWeeks, weekNumber].sort((a, b) => a - b), completedCount: mp.completedCount + 1 }
+                                : mp
+                            )
+                          : [...educationProgram.memberProgress, { groupMemberId, completedWeeks: [weekNumber], completedCount: 1 }],
+                      });
+                    }
+                  }
+                } catch (err) {
+                  toast.error(err instanceof ApiError ? err.message : "교육 진행 업데이트에 실패했습니다.");
+                }
+              }}
               onUpdateStart={() => setUpdatingMemberId(member.memberId)}
               onUpdateEnd={() => setUpdatingMemberId(null)}
               onUpdate={(updated) => {
@@ -714,6 +765,9 @@ interface MemberCardProps {
   gatheringId: string;
   canEdit: boolean;
   globalDisabled: boolean;
+  educationProgram: EducationProgram | null;
+  gatheringProgress: EducationProgress[];
+  onEducationToggle: (groupMemberId: string, weekNumber: number, progressId?: string) => void;
   onUpdateStart: () => void;
   onUpdateEnd: () => void;
   onUpdate: (member: GatheringMember) => void;
@@ -726,6 +780,9 @@ function MemberCard({
   gatheringId,
   canEdit,
   globalDisabled,
+  educationProgram,
+  gatheringProgress,
+  onEducationToggle,
   onUpdateStart,
   onUpdateEnd,
   onUpdate,
@@ -923,6 +980,45 @@ function MemberCard({
             )}
           </div>
         </div>
+
+        {/* ── Education Progress ── */}
+        {educationProgram && (
+          <div className="mt-2 flex flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
+            {Array.from({ length: educationProgram.totalWeeks }, (_, i) => i + 1).map((week) => {
+              const memberProg = educationProgram.memberProgress.find(
+                (mp) => mp.groupMemberId === member.groupMemberId
+              );
+              const isCompleted = memberProg?.completedWeeks.includes(week) ?? false;
+              const thisGatheringProg = gatheringProgress.find(
+                (p) => p.groupMemberId === member.groupMemberId && p.weekNumber === week
+              );
+              return (
+                <button
+                  key={week}
+                  type="button"
+                  disabled={!canEdit || (isCompleted && !thisGatheringProg)}
+                  onClick={() => onEducationToggle(member.groupMemberId, week, thisGatheringProg?.id)}
+                  className={cn(
+                    "h-7 w-7 rounded text-[11px] font-medium transition-all",
+                    isCompleted
+                      ? thisGatheringProg
+                        ? "bg-amber-500 text-white"
+                        : "bg-amber-200 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"
+                      : "bg-muted text-muted-foreground hover:bg-muted-foreground/20",
+                    (!canEdit || (isCompleted && !thisGatheringProg)) && "opacity-50 cursor-not-allowed"
+                  )}
+                  title={
+                    isCompleted && !thisGatheringProg
+                      ? `${week}주차 (다른 모임에서 완료)`
+                      : `${week}주차`
+                  }
+                >
+                  {week}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* ── Expanded ── */}
         {isExpanded && (

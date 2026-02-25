@@ -1,6 +1,8 @@
 import type {
   Church,
   CreateGatheringRequest,
+  EducationProgram,
+  EducationProgress,
   Gathering,
   GatheringDetail,
   GatheringResponse,
@@ -420,6 +422,43 @@ export const mediaApi = {
 
   deleteMediaByEntityId: (entityId: string) =>
     authedFetch<void>(`/media/entity/${entityId}`, { method: "DELETE" }),
+};
+
+export const educationApi = {
+  getProgram: (groupId: string) =>
+    authedFetch<EducationProgram>(`/groups/${groupId}/education-program`),
+
+  createProgram: (groupId: string, data: { name: string; description?: string; totalWeeks: number }) =>
+    authedFetch<EducationProgram>(`/groups/${groupId}/education-program`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateProgram: (groupId: string, data: { name: string; description?: string; totalWeeks: number }) =>
+    authedFetch<EducationProgram>(`/groups/${groupId}/education-program`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  recordProgress: (gatheringId: string, data: { groupMemberId: string; weekNumber: number }) =>
+    authedFetch<EducationProgress>(`/gatherings/${gatheringId}/education-progress`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  removeProgress: (gatheringId: string, progressId: string) =>
+    authedFetch<void>(`/gatherings/${gatheringId}/education-progress/${progressId}`, {
+      method: "DELETE",
+    }),
+
+  getProgressByGathering: (gatheringId: string) =>
+    authedFetch<EducationProgress[]>(`/gatherings/${gatheringId}/education-progress`),
+
+  graduateMember: (groupId: string, data: { groupMemberId: string; targetGroupId: string }) =>
+    authedFetch<void>(`/groups/${groupId}/graduate`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 export interface EventItem {

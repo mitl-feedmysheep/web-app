@@ -1,14 +1,34 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Users, Loader2, GraduationCap } from "lucide-react";
 import { groupsApi, churchesApi } from "@/lib/api";
-import type { Group } from "@/types";
+import type { Group, GroupType } from "@/types";
 
 interface GroupLeaderInfo {
   groupId: string;
   groupName: string;
   leaderName: string | null;
+}
+
+function getGroupTypeConfig(type?: GroupType) {
+  switch (type) {
+    case "NEWCOMER":
+      return {
+        icon: GraduationCap,
+        bgColor: "bg-amber-100 dark:bg-amber-950/40",
+        iconColor: "text-amber-600 dark:text-amber-400",
+        label: "새가족부",
+      };
+    default:
+      return {
+        icon: Users,
+        bgColor: "bg-primary/10",
+        iconColor: "text-primary",
+        label: "소그룹",
+      };
+  }
 }
 
 function GroupListPage() {
@@ -80,41 +100,51 @@ function GroupListPage() {
         나의 소그룹 {groups.length}개
       </p>
 
-      {groups.map((group) => (
-        <Card
-          key={group.id}
-          className="cursor-pointer border-0 shadow-md shadow-primary/5 transition-all hover:shadow-lg active:scale-[0.98]"
-          onClick={() => navigate(`/groups/${group.id}`)}
-        >
-          <CardContent className="flex items-center gap-4 py-4">
-            {group.imageUrl ? (
-              <img
-                src={group.imageUrl}
-                alt={group.name}
-                className="h-14 w-14 rounded-2xl object-cover"
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-2xl">
-                🙏
+      {groups.map((group) => {
+        const typeConfig = getGroupTypeConfig(group.type);
+        return (
+          <Card
+            key={group.id}
+            className="cursor-pointer border-0 shadow-md shadow-primary/5 transition-all hover:shadow-lg active:scale-[0.98]"
+            onClick={() => navigate(`/groups/${group.id}`)}
+          >
+            <CardContent className="flex items-center gap-4 py-4">
+              {group.imageUrl ? (
+                <img
+                  src={group.imageUrl}
+                  alt={group.name}
+                  className="h-14 w-14 rounded-2xl object-cover"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${typeConfig.bgColor}`}>
+                  <typeConfig.icon className={`h-7 w-7 ${typeConfig.iconColor}`} />
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">{group.name}</h3>
+                  {group.type && group.type !== "NORMAL" && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {typeConfig.label}
+                    </Badge>
+                  )}
+                </div>
+                <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" />
+                    {group.groupMemberCount}명
+                  </span>
+                  {group.description && (
+                    <span className="line-clamp-1">{group.description}</span>
+                  )}
+                </div>
               </div>
-            )}
-            <div className="flex-1">
-              <h3 className="font-semibold">{group.name}</h3>
-              <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
-                  {group.groupMemberCount}명
-                </span>
-                {group.description && (
-                  <span className="line-clamp-1">{group.description}</span>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {groups.length === 0 && (
         <div className="py-20 text-center">
