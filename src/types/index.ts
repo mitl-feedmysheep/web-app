@@ -139,6 +139,7 @@ export interface GatheringMember {
   groupMemberId: string;
   name: string;
   birthday?: string;
+  role?: string;
   worshipAttendance: boolean;
   gatheringAttendance: boolean;
   story: string;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Loader2, GraduationCap } from "lucide-react";
+import { Users, Loader2, HandHeart } from "lucide-react";
 import { groupsApi, churchesApi } from "@/lib/api";
 import type { Group, GroupType } from "@/types";
 
@@ -16,17 +16,19 @@ function getGroupTypeConfig(type?: GroupType) {
   switch (type) {
     case "NEWCOMER":
       return {
-        icon: GraduationCap,
-        bgColor: "bg-amber-100 dark:bg-amber-950/40",
-        iconColor: "text-amber-600 dark:text-amber-400",
+        icon: HandHeart,
+        bgColor: "bg-rose-100 dark:bg-rose-950/40",
+        iconColor: "text-rose-500 dark:text-rose-400",
         label: "새가족부",
+        badgeClass: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800",
       };
     default:
       return {
         icon: Users,
         bgColor: "bg-primary/10",
         iconColor: "text-primary",
-        label: "소그룹",
+        label: "소모임",
+        badgeClass: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border-sky-200 dark:border-sky-800",
       };
   }
 }
@@ -125,11 +127,9 @@ function GroupListPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{group.name}</h3>
-                  {group.type && group.type !== "NORMAL" && (
-                    <Badge variant="secondary" className="text-[10px]">
-                      {typeConfig.label}
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className={`text-[10px] ${typeConfig.badgeClass}`}>
+                    {typeConfig.label}
+                  </Badge>
                 </div>
                 <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">

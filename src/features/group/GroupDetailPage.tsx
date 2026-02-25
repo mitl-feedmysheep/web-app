@@ -166,7 +166,7 @@ function GroupDetailPage() {
             </Badge>
           </div>
           <div className="space-y-2">
-            {members.map((m) => {
+            {members.filter((m) => m.role === "MEMBER").map((m) => {
               const memberProgress = educationProgram.memberProgress.find(
                 (p) => p.groupMemberId === m.id
               );
@@ -174,31 +174,52 @@ function GroupDetailPage() {
               const total = educationProgram.totalWeeks;
               const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+              const completedWeeks = memberProgress?.completedWeeks ?? [];
+
               return (
-                <div key={m.id} className="flex items-center gap-3 rounded-lg bg-accent/40 px-3 py-2">
-                  <Avatar className="h-8 w-8 bg-primary/10">
-                    <AvatarFallback className="bg-primary/10 text-[10px] font-medium text-primary">
-                      {m.name.slice(-2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{m.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {completed}/{total}주
-                        {completed >= total && (
-                          <CheckCircle2 className="ml-1 inline h-3.5 w-3.5 text-green-500" />
-                        )}
-                      </span>
-                    </div>
-                    <div className="mt-1 h-1.5 w-full rounded-full bg-accent">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          completed >= total ? "bg-green-500" : "bg-primary"
-                        )}
-                        style={{ width: `${percentage}%` }}
-                      />
+                <div key={m.id} className="rounded-lg bg-accent/40 px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 bg-primary/10">
+                      <AvatarFallback className="bg-primary/10 text-[10px] font-medium text-primary">
+                        {m.name.slice(-2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-medium">{m.name}</span>
+                          <div className="flex gap-0.5">
+                            {Array.from({ length: total }, (_, i) => i + 1).map((week) => (
+                              <div
+                                key={week}
+                                className={cn(
+                                  "flex h-4 w-4 items-center justify-center rounded-[3px] text-[9px] font-semibold",
+                                  completedWeeks.includes(week)
+                                    ? "bg-amber-500 text-white"
+                                    : "bg-muted-foreground/10 text-muted-foreground/40"
+                                )}
+                              >
+                                {week}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {completed}/{total}주
+                          {completed >= total && (
+                            <CheckCircle2 className="ml-1 inline h-3.5 w-3.5 text-green-500" />
+                          )}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 w-full rounded-full bg-accent">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            completed >= total ? "bg-green-500" : "bg-primary"
+                          )}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

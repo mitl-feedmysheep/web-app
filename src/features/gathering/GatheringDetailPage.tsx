@@ -981,8 +981,8 @@ function MemberCard({
           </div>
         </div>
 
-        {/* ── Education Progress ── */}
-        {educationProgram && (
+        {/* ── Education Progress (MEMBER role only) ── */}
+        {educationProgram && member.role === "MEMBER" && (
           <div className="mt-2 flex flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
             {Array.from({ length: educationProgram.totalWeeks }, (_, i) => i + 1).map((week) => {
               const memberProg = educationProgram.memberProgress.find(
