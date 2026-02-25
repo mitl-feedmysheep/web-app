@@ -159,13 +159,18 @@ function GroupDetailPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-amber-600" />
-              <span className="text-sm font-semibold">{educationProgram.name}</span>
+              <span className="text-sm font-semibold">
+                {educationProgram.name}
+                <span className="ml-1 font-normal text-muted-foreground">
+                  ({members.filter((m) => m.role === "MEMBER").length}명)
+                </span>
+              </span>
             </div>
             <Badge variant="secondary" className="text-[10px]">
               수료 {educationProgram.graduatedCount}명
             </Badge>
           </div>
-          <div className="space-y-2">
+          <div className="max-h-[280px] space-y-2 overflow-y-auto scrollbar-hide">
             {members.filter((m) => m.role === "MEMBER").length === 0 ? (
               <div className="rounded-lg bg-accent/40 px-3 py-3 text-center">
                 <p className="text-xs text-muted-foreground/60">
