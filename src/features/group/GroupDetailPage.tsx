@@ -178,7 +178,13 @@ function GroupDetailPage() {
                 </p>
               </div>
             ) : (
-              members.filter((m) => m.role === "MEMBER").map((m) => {
+              members.filter((m) => m.role === "MEMBER")
+                .sort((a, b) => {
+                  const aCount = educationProgram.memberProgress.find((p) => p.groupMemberId === a.id)?.completedCount ?? 0;
+                  const bCount = educationProgram.memberProgress.find((p) => p.groupMemberId === b.id)?.completedCount ?? 0;
+                  return bCount - aCount;
+                })
+                .map((m) => {
                 const memberProgress = educationProgram.memberProgress.find(
                   (p) => p.groupMemberId === m.id
                 );
