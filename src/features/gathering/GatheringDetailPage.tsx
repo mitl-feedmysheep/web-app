@@ -1037,7 +1037,7 @@ function MemberCard({
                   <textarea
                     value={story}
                     onChange={(e) => setStory(e.target.value)}
-                    placeholder="나눔 내용을 적어주세요"
+                    placeholder="나눔 내용을 적어주세요."
                     rows={2}
                     maxLength={500}
                     className="w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -1052,8 +1052,8 @@ function MemberCard({
                   <Input
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
-                    placeholder="이번 주 목표를 적어주세요"
-                    className="bg-background text-sm"
+                    placeholder="이번 주 목표를 적어주세요."
+                    className="bg-background dark:bg-background text-sm"
                   />
                 </div>
 
@@ -1079,8 +1079,8 @@ function MemberCard({
                               )
                             )
                           }
-                          placeholder="기도제목을 적어주세요"
-                          className="bg-background text-sm"
+                          placeholder="기도제목을 적어주세요."
+                          className="bg-background dark:bg-background text-sm"
                         />
                         <Button
                           variant="ghost"

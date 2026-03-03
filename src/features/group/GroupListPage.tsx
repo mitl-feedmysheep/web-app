@@ -17,10 +17,10 @@ function getGroupTypeConfig(type?: GroupType) {
     case "NEWCOMER":
       return {
         icon: HandHeart,
-        bgColor: "bg-rose-100 dark:bg-rose-950/40",
-        iconColor: "text-rose-500 dark:text-rose-400",
+        bgColor: "bg-rose-100 dark:bg-rose-100",
+        iconColor: "text-rose-500 dark:text-rose-500",
         label: "새가족부",
-        badgeClass: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+        badgeClass: "bg-rose-100 text-rose-700 dark:bg-rose-100 dark:text-rose-700 border-rose-200 dark:border-rose-200",
       };
     default:
       return {
@@ -28,7 +28,7 @@ function getGroupTypeConfig(type?: GroupType) {
         bgColor: "bg-primary/10",
         iconColor: "text-primary",
         label: "소모임",
-        badgeClass: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+        badgeClass: "bg-sky-100 text-sky-700 dark:bg-sky-100 dark:text-sky-700 border-sky-200 dark:border-sky-200",
       };
   }
 }
