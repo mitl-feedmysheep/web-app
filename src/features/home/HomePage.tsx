@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail } from "lucide-react";
-import { membersApi, churchesApi, messagesApi } from "@/lib/api";
+import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail, Bell } from "lucide-react";
+import { membersApi, churchesApi, messagesApi, notificationsApi } from "@/lib/api";
 import type { User } from "@/types";
 import SendMessageModal from "./SendMessageModal";
 import MiniCalendar from "./MiniCalendar";
@@ -19,14 +19,19 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifUnreadCount, setNotifUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   const currentMonth = new Date().getMonth() + 1;
 
   const fetchUnread = useCallback(async () => {
     try {
-      const { count } = await messagesApi.getUnreadCount();
-      setUnreadCount(count);
+      const [msgResult, notifResult] = await Promise.allSettled([
+        messagesApi.getUnreadCount(),
+        notificationsApi.getUnreadCount(),
+      ]);
+      if (msgResult.status === "fulfilled") setUnreadCount(msgResult.value.count);
+      if (notifResult.status === "fulfilled") setNotifUnreadCount(notifResult.value.count);
     } catch {
       // ignore
     }
@@ -77,18 +82,32 @@ function HomePage() {
           <h2 className="text-xl font-bold">
             {user?.name ?? "사용자"}님, 반가워요! 👋
           </h2>
-          <button
-            type="button"
-            className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
-            onClick={() => navigate("/messages")}
-          >
-            <Mail className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
+              onClick={() => navigate("/notifications")}
+            >
+              <Bell className="h-5 w-5" />
+              {notifUnreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {notifUnreadCount > 99 ? "99+" : notifUnreadCount}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
+              onClick={() => navigate("/messages")}
+            >
+              <Mail className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           오늘도 하나님의 은혜 안에서 좋은 하루 되세요

@@ -342,6 +342,19 @@ export const messagesApi = {
     authedFetch<void>(`/messages/${messageId}/read`, { method: "PATCH" }),
 };
 
+export const notificationsApi = {
+  getMyNotifications: () =>
+    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; isRead: boolean; createdAt: string }>>(
+      "/notifications"
+    ),
+
+  getUnreadCount: () =>
+    authedFetch<{ count: number }>("/notifications/unread-count"),
+
+  markAsRead: (id: string) =>
+    authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),
+};
+
 export const prayersApi = {
   getMyPrayers: () =>
     authedFetch<
