@@ -1034,11 +1034,13 @@ function MemberCard({
                     <FileText className="h-3 w-3" />
                     나눔
                   </p>
-                  <Input
+                  <textarea
                     value={story}
                     onChange={(e) => setStory(e.target.value)}
                     placeholder="나눔 내용을 적어주세요"
-                    className="bg-background text-sm"
+                    rows={2}
+                    maxLength={500}
+                    className="w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   />
                 </div>
 
@@ -1127,7 +1129,7 @@ function MemberCard({
                     <FileText className="h-3 w-3" />
                     나눔
                   </p>
-                  <p className="text-sm text-foreground">
+                  <p className="whitespace-pre-wrap text-sm text-foreground">
                     {member.story || (
                       <span className="text-muted-foreground">-</span>
                     )}
