@@ -23,7 +23,7 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
   const [searched, setSearched] = useState(false);
   const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const doSearch = useCallback(async (text: string) => {
     const churchId = localStorage.getItem("churchId");
