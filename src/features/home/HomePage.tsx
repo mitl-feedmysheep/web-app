@@ -65,8 +65,6 @@ function HomePage() {
     };
     load();
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
-    return () => clearInterval(interval);
   }, [currentMonth, fetchUnread]);
 
   if (loading) {
