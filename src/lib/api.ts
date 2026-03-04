@@ -10,6 +10,7 @@ import type {
   JoinRequest,
   LoginRequest,
   LoginResponse,
+  MemberSearchResult,
   SignupRequest,
   SignupResponse,
   User,
@@ -236,6 +237,11 @@ export const churchesApi = {
     }
   },
 
+  searchMembers: (churchId: string, searchText: string) =>
+    authedFetch<MemberSearchResult[]>(
+      `/churches/${churchId}/members/search?searchText=${encodeURIComponent(searchText)}`
+    ),
+
   getGroupsWithLeaders: (churchId: string) =>
     authedFetch<
       Array<{ groupId: string; groupName: string; leaderName: string | null }>
@@ -340,6 +346,19 @@ export const messagesApi = {
 
   markAsRead: (messageId: string) =>
     authedFetch<void>(`/messages/${messageId}/read`, { method: "PATCH" }),
+};
+
+export const notificationsApi = {
+  getMyNotifications: () =>
+    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; isRead: boolean; createdAt: string }>>(
+      "/notifications"
+    ),
+
+  getUnreadCount: () =>
+    authedFetch<{ count: number }>("/notifications/unread-count"),
+
+  markAsRead: (id: string) =>
+    authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),
 };
 
 export const prayersApi = {
@@ -465,7 +484,8 @@ export interface EventItem {
   id: string;
   title: string;
   description?: string;
-  date: string; // YYYY-MM-DD
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
   startTime?: unknown; // string "HH:mm" or array [H, M] depending on backend serialization
   endTime?: unknown;
   location?: string;

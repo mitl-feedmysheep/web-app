@@ -157,6 +157,15 @@ function MessagesPage() {
                   <span className="flex-1 text-sm text-muted-foreground">
                     {label}
                   </span>
+                  {tab === "sent" && (
+                    <span
+                      className={`shrink-0 text-[11px] font-medium ${
+                        msg.isRead ? "text-blue-500" : "text-muted-foreground/50"
+                      }`}
+                    >
+                      {msg.isRead ? "읽음" : "안읽음"}
+                    </span>
+                  )}
                   <span className="shrink-0 text-[11px] text-muted-foreground">
                     {formatTime(msg.createdAt)}
                   </span>
