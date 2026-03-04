@@ -5,13 +5,24 @@ import { eventsApi, type EventItem } from "@/lib/api";
 interface CalendarEvent {
   id: string;
   title: string;
-  date: string; // YYYY-MM-DD
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
   description?: string;
   time?: string;
   location?: string;
 }
 
+interface WeekEventSegment {
+  event: CalendarEvent;
+  startCol: number; // 0~6
+  span: number;
+  lane: number;
+  isStart: boolean;
+  isEnd: boolean;
+}
+
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+const MAX_VISIBLE_LANES = 2;
 
 function normalizeTime(raw: unknown): string | undefined {
   if (!raw) return undefined;
@@ -51,11 +62,135 @@ function toCalendarEvent(ev: EventItem): CalendarEvent {
   return {
     id: ev.id,
     title: ev.title,
-    date: ev.date,
+    startDate: ev.startDate,
+    endDate: ev.endDate,
     description: ev.description,
     time,
     location: ev.location,
   };
+}
+
+/** Parse "YYYY-MM-DD" as local date */
+function parseDate(s: string): Date {
+  return new Date(s + "T00:00:00");
+}
+
+/** Format date as "YYYY-MM-DD" */
+function fmtDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Check if a date string falls within [start, end] inclusive */
+function dateInRange(dateStr: string, startStr: string, endStr: string): boolean {
+  return dateStr >= startStr && dateStr <= endStr;
+}
+
+/** Get events active on a specific date */
+function getEventsForDate(events: CalendarEvent[], dateStr: string): CalendarEvent[] {
+  return events.filter((ev) => dateInRange(dateStr, ev.startDate, ev.endDate));
+}
+
+/** Build week rows from year/month */
+function buildWeekRows(year: number, month: number): (number | null)[][] {
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const flat: (number | null)[] = [];
+
+  for (let i = 0; i < firstDay; i++) flat.push(null);
+  for (let d = 1; d <= daysInMonth; d++) flat.push(d);
+  // pad last week to 7
+  while (flat.length % 7 !== 0) flat.push(null);
+
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < flat.length; i += 7) {
+    weeks.push(flat.slice(i, i + 7));
+  }
+  return weeks;
+}
+
+/** Compute bar segments for one week row */
+function computeSegments(
+  week: (number | null)[],
+  events: CalendarEvent[],
+  year: number,
+  month: number,
+): WeekEventSegment[] {
+  // Build date strings for each col in the week
+  const colDates: (string | null)[] = week.map((day) =>
+    day !== null ? fmtDate(new Date(year, month, day)) : null,
+  );
+
+  // Find events that overlap this week
+  const validDates = colDates.filter((d): d is string => d !== null);
+  if (validDates.length === 0) return [];
+
+  const weekStart = validDates[0];
+  const weekEnd = validDates[validDates.length - 1];
+
+  const overlapping = events.filter(
+    (ev) => ev.startDate !== ev.endDate && ev.startDate <= weekEnd && ev.endDate >= weekStart,
+  );
+
+  // Sort: longer events first, then by start date
+  overlapping.sort((a, b) => {
+    const aDays = daysBetween(a.startDate, a.endDate);
+    const bDays = daysBetween(b.startDate, b.endDate);
+    if (bDays !== aDays) return bDays - aDays;
+    return a.startDate.localeCompare(b.startDate);
+  });
+
+  // Build segments
+  const segments: Omit<WeekEventSegment, "lane">[] = [];
+  for (const ev of overlapping) {
+    // Find first col where event is active
+    let startCol = -1;
+    let endCol = -1;
+    for (let c = 0; c < 7; c++) {
+      const d = colDates[c];
+      if (d && dateInRange(d, ev.startDate, ev.endDate)) {
+        if (startCol === -1) startCol = c;
+        endCol = c;
+      }
+    }
+    if (startCol === -1) continue;
+
+    const span = endCol - startCol + 1;
+    const isStart = colDates[startCol] === ev.startDate;
+    const isEnd = colDates[endCol] === ev.endDate;
+
+    segments.push({ event: ev, startCol, span, isStart, isEnd });
+  }
+
+  // Greedy lane allocation
+  const result: WeekEventSegment[] = [];
+  const lanes: number[][] = []; // lanes[lane] = list of endCols of segments in that lane
+
+  for (const seg of segments) {
+    let assignedLane = -1;
+    for (let l = 0; l < lanes.length; l++) {
+      const occupied = lanes[l].some(
+        (end) => end >= seg.startCol,
+      );
+      if (!occupied) {
+        assignedLane = l;
+        break;
+      }
+    }
+    if (assignedLane === -1) {
+      assignedLane = lanes.length;
+      lanes.push([]);
+    }
+    lanes[assignedLane].push(seg.startCol + seg.span - 1);
+    result.push({ ...seg, lane: assignedLane });
+  }
+
+  return result;
+}
+
+function daysBetween(start: string, end: string): number {
+  const s = parseDate(start);
+  const e = parseDate(end);
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function MiniCalendar() {
@@ -64,6 +199,7 @@ function MiniCalendar() {
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [dayEventsList, setDayEventsList] = useState<{ date: string; events: CalendarEvent[] } | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   const year = viewDate.getFullYear();
@@ -85,33 +221,28 @@ function MiniCalendar() {
     fetchEvents(year, month);
   }, [year, month, fetchEvents]);
 
-  const calendarDays = useMemo(() => {
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const days: (number | null)[] = [];
+  const weekRows = useMemo(() => buildWeekRows(year, month), [year, month]);
 
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let d = 1; d <= daysInMonth; d++) days.push(d);
-
-    return days;
-  }, [year, month]);
-
-  const eventsByDate = useMemo(() => {
-    const map = new Map<string, CalendarEvent[]>();
-    for (const ev of events) {
-      const key = ev.date;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(ev);
-    }
-    return map;
-  }, [events]);
+  const weekSegments = useMemo(
+    () => weekRows.map((week) => computeSegments(week, events, year, month)),
+    [weekRows, events, year, month],
+  );
 
   const monthEvents = useMemo(() => {
-    const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
+    const monthStart = fmtDate(new Date(year, month, 1));
+    const monthEnd = fmtDate(new Date(year, month + 1, 0));
 
+    // Deduplicate by event id (an event spanning weeks would appear once)
+    const seen = new Set<string>();
     return events
-      .filter((ev) => ev.date.startsWith(monthStr))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .filter((ev) => {
+        if (seen.has(ev.id)) return false;
+        // Event overlaps this month
+        if (ev.endDate < monthStart || ev.startDate > monthEnd) return false;
+        seen.add(ev.id);
+        return true;
+      })
+      .sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [events, year, month]);
 
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
@@ -172,55 +303,104 @@ function MiniCalendar() {
           ))}
         </div>
 
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-y-0.5">
-          {calendarDays.map((day, idx) => {
-            if (day === null) {
-              return <div key={`empty-${idx}`} className="h-8" />;
-            }
+        {/* Calendar grid — week by week */}
+        {weekRows.map((week, weekIdx) => {
+          const segments = weekSegments[weekIdx];
+          const maxLane = segments.length > 0
+            ? Math.min(Math.max(...segments.map((s) => s.lane)), MAX_VISIBLE_LANES - 1)
+            : -1;
+          const visibleSegments = segments.filter((s) => s.lane < MAX_VISIBLE_LANES);
+          const hiddenCount = segments.filter((s) => s.lane >= MAX_VISIBLE_LANES).length;
+          const barAreaHeight = maxLane >= 0 ? (maxLane + 1) * 6 + (hiddenCount > 0 ? 10 : 0) : 0;
 
-            const dayEvents = eventsByDate.get(dateKey(day));
-            const dayOfWeek = new Date(year, month, day).getDay();
+          return (
+            <div key={weekIdx}>
+              {/* Date numbers */}
+              <div className="grid grid-cols-7">
+                {week.map((day, colIdx) => {
+                  if (day === null) {
+                    return <div key={`empty-${weekIdx}-${colIdx}`} className="h-7" />;
+                  }
 
-            return (
-              <button
-                key={day}
-                type="button"
-                className="group relative flex h-8 flex-col items-center justify-center rounded-md transition-colors hover:bg-accent/60"
-                onClick={() => {
-                  if (dayEvents?.length) setSelectedEvent(dayEvents[0]);
-                }}
-              >
-                <span
-                  className={`text-xs leading-none ${
-                    isToday(day)
-                      ? "flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold"
-                      : dayOfWeek === 0
-                        ? "text-red-400"
-                        : dayOfWeek === 6
-                          ? "text-blue-400"
-                          : "text-foreground"
-                  }`}
-                >
-                  {day}
-                </span>
-                {dayEvents && dayEvents.length > 0 && (
-                  <div className="absolute bottom-0.5 flex gap-0.5">
-                    {dayEvents.slice(0, 2).map((ev) => (
+                  const dayOfWeek = new Date(year, month, day).getDay();
+                  const dayEvts = getEventsForDate(events, dateKey(day));
+                  const singleDayEvts = dayEvts.filter((ev) => ev.startDate === ev.endDate);
+
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      className="group relative flex h-8 flex-col items-center justify-center rounded-md transition-colors hover:bg-accent/60"
+                      onClick={() => {
+                        if (dayEvts.length === 1) setSelectedEvent(dayEvts[0]);
+                        else if (dayEvts.length >= 2) setDayEventsList({ date: dateKey(day), events: dayEvts });
+                      }}
+                    >
                       <span
-                        key={ev.id}
-                        className="h-1 w-1 rounded-full bg-primary"
-                      />
-                    ))}
-                    {dayEvents.length > 2 && (
-                      <span className="h-1 w-1 rounded-full bg-gray-400" />
-                    )}
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                        className={`text-xs leading-none ${
+                          isToday(day)
+                            ? "flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold"
+                            : dayOfWeek === 0
+                              ? "text-red-400"
+                              : dayOfWeek === 6
+                                ? "text-blue-400"
+                                : "text-foreground"
+                        }`}
+                      >
+                        {day}
+                      </span>
+                      {singleDayEvts.length > 0 && (
+                        <div className="absolute bottom-0.5 flex gap-0.5">
+                          {singleDayEvts.slice(0, 2).map((ev) => (
+                            <span
+                              key={ev.id}
+                              className="h-1 w-1 rounded-full bg-primary"
+                            />
+                          ))}
+                          {singleDayEvts.length > 2 && (
+                            <span className="h-1 w-1 rounded-full bg-gray-400" />
+                          )}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Event bars */}
+              {barAreaHeight > 0 && (
+                <div className="relative" style={{ height: barAreaHeight }}>
+                  {visibleSegments.map((seg) => {
+                    const left = (seg.startCol / 7) * 100;
+                    const width = (seg.span / 7) * 100;
+                    const top = seg.lane * 6;
+                    const roundedL = seg.isStart ? "rounded-l-sm" : "";
+                    const roundedR = seg.isEnd ? "rounded-r-sm" : "";
+
+                    return (
+                      <button
+                        key={`${seg.event.id}-${weekIdx}`}
+                        type="button"
+                        className={`absolute h-[4px] bg-primary/80 hover:bg-primary transition-colors ${roundedL} ${roundedR}`}
+                        style={{ left: `${left}%`, width: `${width}%`, top }}
+                        onClick={() => setSelectedEvent(seg.event)}
+                      >
+                      </button>
+                    );
+                  })}
+                  {hiddenCount > 0 && (
+                    <div
+                      className="absolute text-[9px] text-muted-foreground left-0 px-1"
+                      style={{ top: (maxLane + 1) * 6 }}
+                    >
+                      +{hiddenCount}개 더보기
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {/* Monthly events list */}
         {monthEvents.length > 0 && (
@@ -229,10 +409,14 @@ function MiniCalendar() {
               {month + 1}월 일정
             </span>
             {monthEvents.map((ev) => {
-              const evDate = new Date(ev.date + "T00:00:00");
-              const dayLabel = `${evDate.getMonth() + 1}/${evDate.getDate()}`;
+              const sDate = parseDate(ev.startDate);
+              const eDate = parseDate(ev.endDate);
+              const isMultiDay = ev.startDate !== ev.endDate;
+              const dayLabel = isMultiDay
+                ? `${sDate.getMonth() + 1}/${sDate.getDate()} - ${eDate.getMonth() + 1}/${eDate.getDate()}`
+                : `${sDate.getMonth() + 1}/${sDate.getDate()}`;
               const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-              const isPast = evDate < todayStart;
+              const isPast = eDate < todayStart;
               return (
                 <button
                   key={ev.id}
@@ -253,6 +437,57 @@ function MiniCalendar() {
           </div>
         )}
       </div>
+
+      {/* Day events list overlay */}
+      {dayEventsList && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/40 px-6"
+          onClick={() => setDayEventsList(null)}
+        >
+          <div
+            className="w-full max-w-sm animate-in fade-in zoom-in-95 rounded-2xl bg-card p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-start justify-between">
+              <h4 className="text-sm font-bold">
+                {(() => {
+                  const d = parseDate(dayEventsList.date);
+                  return `${d.getMonth() + 1}월 ${d.getDate()}일(${WEEKDAYS[d.getDay()]}) 일정`;
+                })()}
+              </h4>
+              <button
+                type="button"
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent"
+                onClick={() => setDayEventsList(null)}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-1">
+              {dayEventsList.events.map((ev) => (
+                <button
+                  key={ev.id}
+                  type="button"
+                  className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent/50"
+                  onClick={() => {
+                    setDayEventsList(null);
+                    setSelectedEvent(ev);
+                  }}
+                >
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium">{ev.title}</p>
+                    {ev.time && (
+                      <p className="text-[10px] text-muted-foreground">{ev.time}</p>
+                    )}
+                  </div>
+                  <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Event detail overlay */}
       {selectedEvent && (
@@ -286,10 +521,15 @@ function MiniCalendar() {
               )}
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>
-                  📅{" "}
                   {(() => {
-                    const d = new Date(selectedEvent.date + "T00:00:00");
-                    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAYS[d.getDay()]})`;
+                    const s = parseDate(selectedEvent.startDate);
+                    const e = parseDate(selectedEvent.endDate);
+                    const fmt = (d: Date) =>
+                      `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일(${WEEKDAYS[d.getDay()]})`;
+                    if (selectedEvent.startDate === selectedEvent.endDate) {
+                      return `📅 ${fmt(s)}`;
+                    }
+                    return `📅 ${fmt(s)} ~ ${fmt(e)}`;
                   })()}
                 </p>
                 {selectedEvent.time && <p>🕐 {selectedEvent.time}</p>}

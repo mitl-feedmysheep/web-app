@@ -195,4 +195,8 @@ export interface MemberSearchResult {
   groups: Array<{ groupId: string; groupName: string; role: string }>;
   phone: string | null;
   address: string | null;
+  occupation: string | null;
+  baptismStatus: "BAPTIZED" | "NOT_BAPTIZED" | "PAEDOBAPTISM" | null;
+  mbti: string | null;
+  description: string | null;
 }

@@ -8,7 +8,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { churchesApi } from "@/lib/api";
 import type { MemberSearchResult } from "@/types";
-import { Search, Loader2, Phone, MapPin } from "lucide-react";
+import { Search, Loader2, Phone, MapPin, Briefcase, Brain, Droplets, Mail } from "lucide-react";
+import SendMessageModal from "./SendMessageModal";
 
 interface MemberSearchModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
   const [results, setResults] = useState<MemberSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -70,9 +72,10 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        className="fixed inset-0 z-50 flex h-full w-full max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 p-0 data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100"
+        className="flex max-h-[80vh] flex-col gap-0 p-0"
         showCloseButton={false}
       >
         <DialogHeader className="flex flex-row items-center justify-between border-b px-4 py-3">
@@ -119,57 +122,94 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
                   key={member.memberId}
                   className="rounded-lg bg-accent/50 p-3 space-y-1.5"
                 >
-                  <div className="flex items-center gap-2">
-                    {member.sex && (
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                          member.sex === "M"
-                            ? "bg-blue-100 text-blue-600"
-                            : "bg-pink-100 text-pink-600"
-                        }`}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {member.sex && (
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                            member.sex === "M"
+                              ? "bg-blue-100 text-blue-600"
+                              : "bg-pink-100 text-pink-600"
+                          }`}
+                        >
+                          {member.sex === "M" ? "남" : "여"}
+                        </span>
+                      )}
+                      <span className="text-sm font-semibold">{member.name}</span>
+                      {member.birthday && (
+                        <span className="text-xs text-muted-foreground">
+                          {formatBirthday(member.birthday)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        className="rounded-full p-1.5 text-primary/70 transition-colors hover:bg-primary/10 hover:text-primary"
+                        onClick={() => setMessageTarget({ id: member.memberId, name: member.name })}
                       >
-                        {member.sex === "M" ? "남" : "여"}
-                      </span>
-                    )}
-                    <span className="text-sm font-semibold">{member.name}</span>
-                    {member.birthday && (
-                      <span className="text-xs text-muted-foreground">
-                        {formatBirthday(member.birthday)}
-                      </span>
-                    )}
+                        <Mail className="h-4 w-4" />
+                      </button>
+                      {member.phone && (
+                        <a
+                          href={`tel:${member.phone}`}
+                          className="rounded-full p-1.5 text-primary/70 transition-colors hover:bg-primary/10 hover:text-primary"
+                        >
+                          <Phone className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   {member.groups.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {member.groups.map((g) => (
-                        <span
-                          key={g.groupId}
-                          className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary"
-                        >
-                          {g.groupName}
-                        </span>
-                      ))}
+                      {member.groups.map((g) => {
+                        const roleLabel = g.role === "LEADER" ? " 리더" : g.role === "SUB_LEADER" ? " 부리더" : " 일반";
+                        return (
+                          <span
+                            key={g.groupId}
+                            className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary"
+                          >
+                            {g.groupName}<span className="font-semibold">{roleLabel}</span>
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
 
-                  {(member.phone || member.address) && (
-                    <div className="space-y-0.5 pt-1 border-t border-border/50">
-                      {member.phone && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Phone className="h-3 w-3" />
-                          <a href={`tel:${member.phone}`} className="underline">
-                            {member.phone}
-                          </a>
-                        </div>
-                      )}
-                      {member.address && (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span>{member.address}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="pt-2 border-t border-border/50 space-y-1.5">
+                    {member.address && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span>{member.address}</span>
+                      </div>
+                    )}
+                    {(member.occupation || member.mbti || member.baptismStatus) && (
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        {member.occupation && (
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3 shrink-0" />
+                            {member.occupation}
+                          </span>
+                        )}
+                        {member.mbti && (
+                          <span className="flex items-center gap-1">
+                            <Brain className="h-3 w-3 shrink-0" />
+                            {member.mbti}
+                          </span>
+                        )}
+                        {member.baptismStatus && (
+                          <span className="flex items-center gap-1">
+                            <Droplets className="h-3 w-3 shrink-0" />
+                            {member.baptismStatus === "BAPTIZED" ? "세례" : member.baptismStatus === "PAEDOBAPTISM" ? "유아세례" : "미세례"}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {member.description && (
+                      <p className="text-xs text-muted-foreground pt-0.5">{member.description}</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -183,6 +223,15 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
         </div>
       </DialogContent>
     </Dialog>
+
+    <SendMessageModal
+      open={!!messageTarget}
+      onClose={() => setMessageTarget(null)}
+      receiverId={messageTarget?.id ?? ""}
+      receiverName={messageTarget?.name ?? ""}
+      type="NORMAL"
+    />
+    </>
   );
 }
 

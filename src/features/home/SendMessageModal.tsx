@@ -17,6 +17,7 @@ interface SendMessageModalProps {
   onClose: () => void;
   receiverId: string;
   receiverName: string;
+  type?: "BIRTHDAY" | "NORMAL";
 }
 
 function SendMessageModal({
@@ -24,6 +25,7 @@ function SendMessageModal({
   onClose,
   receiverId,
   receiverName,
+  type = "BIRTHDAY",
 }: SendMessageModalProps) {
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
@@ -37,8 +39,8 @@ function SendMessageModal({
     if (!content.trim()) return;
     setSending(true);
     try {
-      await messagesApi.send(receiverId, content.trim(), "BIRTHDAY");
-      toast.success(`${receiverName}님에게 축하 메시지를 보냈습니다!`);
+      await messagesApi.send(receiverId, content.trim(), type);
+      toast.success(`${receiverName}님에게 메시지를 보냈습니다!`);
       handleClose();
     } catch {
       toast.error("메시지 전송에 실패했습니다.");
@@ -51,10 +53,10 @@ function SendMessageModal({
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>🎂 {receiverName}님에게 축하 메시지</DialogTitle>
+          <DialogTitle>{type === "BIRTHDAY" ? `🎂 ${receiverName}님에게 축하 메시지` : `${receiverName}님에게 쪽지`}</DialogTitle>
         </DialogHeader>
         <Textarea
-          placeholder="축하 메시지를 작성하세요..."
+          placeholder={type === "BIRTHDAY" ? "축하 메시지를 작성하세요..." : "메시지를 작성하세요..."}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
