@@ -10,6 +10,7 @@ import type {
   JoinRequest,
   LoginRequest,
   LoginResponse,
+  MemberSearchResult,
   SignupRequest,
   SignupResponse,
   User,
@@ -235,6 +236,11 @@ export const churchesApi = {
       return false;
     }
   },
+
+  searchMembers: (churchId: string, searchText: string) =>
+    authedFetch<MemberSearchResult[]>(
+      `/churches/${churchId}/members/search?searchText=${encodeURIComponent(searchText)}`
+    ),
 
   getGroupsWithLeaders: (churchId: string) =>
     authedFetch<

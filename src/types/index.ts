@@ -186,3 +186,13 @@ export interface JoinRequest {
   status: "PENDING" | "ACCEPTED" | "DECLINED";
   createdAt: string;
 }
+
+export interface MemberSearchResult {
+  memberId: string;
+  name: string;
+  sex: "M" | "F" | null;
+  birthday: string | null;
+  groups: Array<{ groupId: string; groupName: string; role: string }>;
+  phone: string | null;
+  address: string | null;
+}

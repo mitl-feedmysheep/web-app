@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail, Bell } from "lucide-react";
+import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
 import { membersApi, churchesApi, messagesApi, notificationsApi } from "@/lib/api";
 import type { User } from "@/types";
 import SendMessageModal from "./SendMessageModal";
+import MemberSearchModal from "./MemberSearchModal";
 import MiniCalendar from "./MiniCalendar";
 
 interface BirthdayMember {
@@ -20,6 +21,7 @@ function HomePage() {
   const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
+  const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   const currentMonth = new Date().getMonth() + 1;
@@ -83,6 +85,13 @@ function HomePage() {
             {user?.name ?? "사용자"}님, 반가워요! 👋
           </h2>
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
+              onClick={() => setMemberSearchOpen(true)}
+            >
+              <BookUser className="h-5 w-5" />
+            </button>
             <button
               type="button"
               className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
@@ -236,6 +245,11 @@ function HomePage() {
       </section>
 
       <MiniCalendar />
+
+      <MemberSearchModal
+        open={memberSearchOpen}
+        onClose={() => setMemberSearchOpen(false)}
+      />
 
       <SendMessageModal
         open={!!messageTarget}
