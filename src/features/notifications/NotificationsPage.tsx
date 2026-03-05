@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { notificationsApi } from "@/lib/api";
 
 interface NotificationItem {
   id: string;
   type: string;
+  description: string | null;
   entityType: string;
   entityId: string;
   targetUrl: string | null;
@@ -13,8 +14,9 @@ interface NotificationItem {
   createdAt: string;
 }
 
-const TYPE_LABEL: Record<string, string> = {
-  ADMIN_COMMENT: "목회자 코멘트",
+const TYPE_MESSAGE: Record<string, string> = {
+  ADMIN_COMMENT: "목회자 코멘트가 등록되었어요 😊",
+  GATHERING_USER_CARD_UPDATED: "나의 소모임 정보가 업데이트 되었어요 😊",
 };
 
 function NotificationsPage() {
@@ -89,7 +91,7 @@ function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {notifications.map((item) => {
-            const label = TYPE_LABEL[item.type] ?? item.type;
+            const message = TYPE_MESSAGE[item.type] ?? item.type;
 
             if (!item.isRead) {
               return (
@@ -101,13 +103,19 @@ function NotificationsPage() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="flex-1 text-sm font-semibold">
-                      {label}이 등록되었습니다
+                      {message}
                     </span>
                     <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
                     <span className="shrink-0 text-[11px] text-muted-foreground">
                       {formatTime(item.createdAt)}
                     </span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </div>
+                  {item.description && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {item.description}
+                    </p>
+                  )}
                 </button>
               );
             }
@@ -121,12 +129,18 @@ function NotificationsPage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="flex-1 text-sm text-muted-foreground">
-                    {label}이 등록되었습니다
+                    {message}
                   </span>
                   <span className="shrink-0 text-[11px] text-muted-foreground">
                     {formatTime(item.createdAt)}
                   </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </div>
+                {item.description && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {item.description}
+                  </p>
+                )}
               </button>
             );
           })}
