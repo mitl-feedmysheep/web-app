@@ -445,7 +445,7 @@ export const mediaApi = {
 
 export const educationApi = {
   getProgram: (groupId: string) =>
-    authedFetch<EducationProgram>(`/groups/${groupId}/education-program`),
+    authedFetch<EducationProgram | null>(`/groups/${groupId}/education-program`),
 
   createProgram: (groupId: string, data: { name: string; description?: string; totalWeeks: number }) =>
     authedFetch<EducationProgram>(`/groups/${groupId}/education-program`, {

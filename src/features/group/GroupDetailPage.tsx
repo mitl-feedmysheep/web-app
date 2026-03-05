@@ -66,12 +66,8 @@ function GroupDetailPage() {
         ).sort((a, b) => b.localeCompare(a));
         if (months.length > 0) setMonth(months[0]);
 
-        try {
-          const program = await educationApi.getProgram(groupId);
-          setEducationProgram(program);
-        } catch {
-          // No education program for this group
-        }
+        const program = await educationApi.getProgram(groupId);
+        setEducationProgram(program);
       } catch {
         // silently handle
       } finally {
@@ -154,7 +150,7 @@ function GroupDetailPage() {
         ))}
       </section>
 
-      {educationProgram && (
+      {educationProgram?.id && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
