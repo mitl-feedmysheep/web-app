@@ -76,7 +76,7 @@ function GatheringDetailPage() {
 
   const toHM = (iso: string) => {
     try {
-      const d = new Date(iso);
+      const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
       return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     } catch {
       return "00:00";
@@ -95,7 +95,7 @@ function GatheringDetailPage() {
 
   const formatTimeKR = (iso: string) => {
     try {
-      const d = new Date(iso);
+      const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
       const h = d.getHours();
       const m = String(d.getMinutes()).padStart(2, "0");
       const ampm = h >= 12 ? "오후" : "오전";
