@@ -147,7 +147,7 @@ function GatheringDetailPage() {
 
   // 알림에서 진입 시 highlight + scroll 처리
   useEffect(() => {
-    if (!fromNotification || !gathering || !myInfo) return;
+    if (!fromNotification || !gathering || !myInfo || loading) return;
 
     if (fromNotification === "ADMIN_COMMENT") {
       // 목회자 코멘트 영역으로 스크롤 + 반짝임
@@ -180,7 +180,7 @@ function GatheringDetailPage() {
       next.delete("from");
       return next;
     }, { replace: true });
-  }, [fromNotification, gathering, myInfo]);
+  }, [fromNotification, gathering, myInfo, loading]);
 
   useEffect(() => {
     if (previewIndex !== null) {
