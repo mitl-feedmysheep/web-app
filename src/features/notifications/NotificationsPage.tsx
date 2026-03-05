@@ -50,7 +50,7 @@ function NotificationsPage() {
   };
 
   const formatTime = (iso: string) => {
-    const d = new Date(iso);
+    const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
     const now = new Date();
     const diff = now.getTime() - d.getTime();
     const mins = Math.floor(diff / 60000);
