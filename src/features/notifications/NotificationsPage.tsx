@@ -6,7 +6,7 @@ import { notificationsApi } from "@/lib/api";
 interface NotificationItem {
   id: string;
   type: string;
-  description: string | null;
+  description?: string | null;
   entityType: string;
   entityId: string;
   targetUrl: string | null;
