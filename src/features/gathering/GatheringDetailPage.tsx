@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,9 @@ function GatheringDetailPage() {
     gatheringId: string;
   }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fromNotification = searchParams.get("from");
+  const adminCommentRef = useRef<HTMLDivElement>(null);
 
   const [gathering, setGathering] = useState<GatheringDetail | null>(null);
   const [myInfo, setMyInfo] = useState<User | null>(null);
@@ -141,6 +144,43 @@ function GatheringDetailPage() {
     };
     load();
   }, [gatheringId, groupId]);
+
+  // 알림에서 진입 시 highlight + scroll 처리
+  useEffect(() => {
+    if (!fromNotification || !gathering || !myInfo) return;
+
+    if (fromNotification === "ADMIN_COMMENT") {
+      // 목회자 코멘트 영역으로 스크롤 + 반짝임
+      setTimeout(() => {
+        adminCommentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        adminCommentRef.current?.classList.add("animate-highlight");
+      }, 300);
+    } else if (fromNotification === "GATHERING_USER_CARD_UPDATED") {
+      // myInfo.id는 groupMemberId, gatheringMembers는 memberId 기준 → 변환 필요
+      const myCard = gathering.gatheringMembers.find(
+        (m) => m.groupMemberId === myInfo.id
+      );
+      if (myCard) {
+        setExpandedId(myCard.memberId);
+        setTimeout(() => {
+          const el = document.getElementById(`member-card-${myCard.memberId}`);
+          if (!el) return;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          // 스크롤 완료 후 반짝임
+          setTimeout(() => {
+            el.classList.add("animate-highlight-border");
+          }, 500);
+        }, 300);
+      }
+    }
+
+    // from 파라미터 소비 후 제거 (뒤로가기 시 재트리거 방지)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("from");
+      return next;
+    }, { replace: true });
+  }, [fromNotification, gathering, myInfo]);
 
   useEffect(() => {
     if (previewIndex !== null) {
@@ -407,7 +447,7 @@ function GatheringDetailPage() {
                 </div>
               )}
               {isLeader && (
-                <div className="flex items-center gap-2.5 text-sm">
+                <div ref={adminCommentRef} className="flex items-center gap-2.5 rounded-md px-1 py-0.5 text-sm transition-colors">
                   <BookOpen className="h-4 w-4 shrink-0 text-primary" />
                   <span className="text-muted-foreground">
                     {(gathering.adminComment || "").trim() || "목회자 코멘트"}
@@ -603,8 +643,8 @@ function GatheringDetailPage() {
       {viewMode === "full" && (
         <div className="space-y-3">
           {gathering.gatheringMembers.map((member) => (
+            <div key={member.memberId} id={`member-card-${member.memberId}`}>
             <MemberCard
-              key={member.memberId}
               member={member}
               isExpanded={expandedId === member.memberId}
               onToggle={() =>
@@ -668,6 +708,7 @@ function GatheringDetailPage() {
                 });
               }}
             />
+            </div>
           ))}
         </div>
       )}

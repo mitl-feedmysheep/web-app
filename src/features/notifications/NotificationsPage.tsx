@@ -45,7 +45,8 @@ function NotificationsPage() {
       notificationsApi.markAsRead(item.id).catch(() => {});
     }
     if (item.targetUrl) {
-      navigate(item.targetUrl);
+      const separator = item.targetUrl.includes("?") ? "&" : "?";
+      navigate(`${item.targetUrl}${separator}from=${item.type}`);
     }
   };
 

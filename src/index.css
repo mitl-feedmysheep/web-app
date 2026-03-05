@@ -83,3 +83,24 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes highlight-pulse {
+  0% { background-color: transparent; }
+  15% { background-color: oklch(0.596 0.145 163.225 / 0.18); }
+  85% { background-color: oklch(0.596 0.145 163.225 / 0.18); }
+  100% { background-color: transparent; }
+}
+.animate-highlight {
+  animation: highlight-pulse 1.5s ease-in-out;
+}
+
+@keyframes highlight-border {
+  0% { box-shadow: 0 0 0 0 transparent; }
+  15% { box-shadow: 0 0 0 2px oklch(0.596 0.145 163.225 / 0.5); }
+  85% { box-shadow: 0 0 0 2px oklch(0.596 0.145 163.225 / 0.5); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.animate-highlight-border {
+  animation: highlight-border 1.5s ease-in-out;
+  border-radius: var(--radius);
+}
