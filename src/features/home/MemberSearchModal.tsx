@@ -96,7 +96,7 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
               ref={inputRef}
               value={searchText}
               onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="이름으로 검색하세요"
+              placeholder="이름 또는 휴대폰 번호로 검색하세요"
               className="pl-9"
             />
           </div>
