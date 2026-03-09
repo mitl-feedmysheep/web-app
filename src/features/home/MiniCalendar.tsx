@@ -201,6 +201,7 @@ function MiniCalendar() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [dayEventsList, setDayEventsList] = useState<{ date: string; events: CalendarEvent[] } | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [expanded, setExpanded] = useState(false);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -242,11 +243,18 @@ function MiniCalendar() {
         seen.add(ev.id);
         return true;
       })
-      .sort((a, b) => a.startDate.localeCompare(b.startDate));
+      .sort((a, b) => {
+        const todayStr = fmtDate(today);
+        const aIsPast = a.endDate < todayStr;
+        const bIsPast = b.endDate < todayStr;
+        if (aIsPast !== bIsPast) return aIsPast ? 1 : -1;
+        if (aIsPast) return b.startDate.localeCompare(a.startDate);
+        return a.startDate.localeCompare(b.startDate);
+      });
   }, [events, year, month]);
 
-  const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
+  const prevMonth = () => { setViewDate(new Date(year, month - 1, 1)); setExpanded(false); };
+  const nextMonth = () => { setViewDate(new Date(year, month + 1, 1)); setExpanded(false); };
 
   const isToday = (day: number) =>
     day === today.getDate() &&
@@ -403,39 +411,54 @@ function MiniCalendar() {
         })}
 
         {/* Monthly events list */}
-        {monthEvents.length > 0 && (
-          <div className="mt-2.5 space-y-1.5 border-t border-border/50 pt-2.5">
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {month + 1}월 일정
-            </span>
-            {monthEvents.map((ev) => {
-              const sDate = parseDate(ev.startDate);
-              const eDate = parseDate(ev.endDate);
-              const isMultiDay = ev.startDate !== ev.endDate;
-              const dayLabel = isMultiDay
-                ? `${sDate.getMonth() + 1}/${sDate.getDate()} - ${eDate.getMonth() + 1}/${eDate.getDate()}`
-                : `${sDate.getMonth() + 1}/${sDate.getDate()}`;
-              const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-              const isPast = eDate < todayStart;
-              return (
+        {monthEvents.length > 0 && (() => {
+          const DEFAULT_VISIBLE = 3;
+          const visibleEvents = expanded ? monthEvents : monthEvents.slice(0, DEFAULT_VISIBLE);
+          const hiddenCount = monthEvents.length - DEFAULT_VISIBLE;
+
+          return (
+            <div className="mt-2.5 space-y-1.5 border-t border-border/50 pt-2.5">
+              <span className="text-[10px] font-medium text-muted-foreground">
+                {month + 1}월 일정
+              </span>
+              {visibleEvents.map((ev) => {
+                const sDate = parseDate(ev.startDate);
+                const eDate = parseDate(ev.endDate);
+                const isMultiDay = ev.startDate !== ev.endDate;
+                const dayLabel = isMultiDay
+                  ? `${sDate.getMonth() + 1}/${sDate.getDate()} - ${eDate.getMonth() + 1}/${eDate.getDate()}`
+                  : `${sDate.getMonth() + 1}/${sDate.getDate()}`;
+                const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                const isPast = eDate < todayStart;
+                return (
+                  <button
+                    key={ev.id}
+                    type="button"
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50 ${isPast ? "opacity-45" : ""}`}
+                    onClick={() => setSelectedEvent(ev)}
+                  >
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${isPast ? "bg-muted-foreground" : "bg-primary"}`} />
+                    <span className={`min-w-0 flex-1 truncate text-xs font-medium ${isPast ? "text-muted-foreground" : ""}`}>
+                      {ev.title}
+                    </span>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {dayLabel}
+                    </span>
+                  </button>
+                );
+              })}
+              {hiddenCount > 0 && (
                 <button
-                  key={ev.id}
                   type="button"
-                  className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50 ${isPast ? "opacity-45" : ""}`}
-                  onClick={() => setSelectedEvent(ev)}
+                  className="w-full py-1 text-center text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setExpanded((prev) => !prev)}
                 >
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${isPast ? "bg-muted-foreground" : "bg-primary"}`} />
-                  <span className={`min-w-0 flex-1 truncate text-xs font-medium ${isPast ? "text-muted-foreground" : ""}`}>
-                    {ev.title}
-                  </span>
-                  <span className="shrink-0 text-[10px] text-muted-foreground">
-                    {dayLabel}
-                  </span>
+                  {expanded ? "▲ 접기" : `▼ ${hiddenCount}개 더보기`}
                 </button>
-              );
-            })}
-          </div>
-        )}
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Day events list overlay */}
