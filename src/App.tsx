@@ -21,6 +21,9 @@ import ChangePasswordPage from "@/features/my/ChangePasswordPage";
 import MessagesPage from "@/features/messages/MessagesPage";
 import NotificationsPage from "@/features/notifications/NotificationsPage";
 import GroupManagePage from "@/features/group/GroupManagePage";
+import SermonNotesPage from "@/features/sermon-notes/SermonNotesPage";
+import CreateSermonNotePage from "@/features/sermon-notes/CreateSermonNotePage";
+import SermonNoteDetailPage from "@/features/sermon-notes/SermonNoteDetailPage";
 
 function isSplashEnabled(): boolean {
   const raw = String(import.meta.env.VITE_IS_SPLASH_ON ?? "true").toLowerCase();
@@ -57,6 +60,10 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/groups" element={<GroupListPage />} />
             <Route path="/prayers" element={<PrayerPage />} />
+            <Route path="/sermon-notes" element={<SermonNotesPage />} />
+            <Route path="/sermon-notes/create" element={<CreateSermonNotePage />} />
+            <Route path="/sermon-notes/:id" element={<SermonNoteDetailPage />} />
+            <Route path="/sermon-notes/:id/edit" element={<CreateSermonNotePage />} />
             <Route path="/my" element={<MyPage />} />
             <Route path="/my/account" element={<AccountPage />} />
             <Route path="/my/password" element={<ChangePasswordPage />} />

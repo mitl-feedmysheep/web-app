@@ -5,7 +5,7 @@ import BottomNav from "./BottomNav";
 import { Toaster } from "@/components/ui/sonner";
 import { setGlobalNavigate, setGlobalToast } from "@/lib/auth-handler";
 
-const MAIN_TABS = ["/", "/groups", "/prayers", "/my"];
+const MAIN_TABS = ["/", "/groups", "/prayers", "/sermon-notes", "/my"];
 
 function AppShell() {
   const { pathname } = useLocation();

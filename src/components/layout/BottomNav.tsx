@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Users, Heart, User } from "lucide-react";
+import { Home, Users, Heart, BookOpen, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { path: "/", icon: Home, label: "홈" },
   { path: "/groups", icon: Users, label: "소그룹" },
   { path: "/prayers", icon: Heart, label: "기도" },
+  { path: "/sermon-notes", icon: BookOpen, label: "설교노트" },
   { path: "/my", icon: User, label: "MY" },
 ] as const;
 

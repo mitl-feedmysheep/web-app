@@ -1,6 +1,7 @@
 import type {
   Church,
   CreateGatheringRequest,
+  CreateSermonNoteRequest,
   EducationProgram,
   EducationProgress,
   Gathering,
@@ -11,8 +12,10 @@ import type {
   LoginRequest,
   LoginResponse,
   MemberSearchResult,
+  SermonNote,
   SignupRequest,
   SignupResponse,
+  UpdateSermonNoteRequest,
   User,
 } from "@/types";
 
@@ -490,6 +493,32 @@ export interface EventItem {
   endTime?: unknown;
   location?: string;
 }
+
+export const sermonNotesApi = {
+  getMySermonNotes: () =>
+    authedFetch<SermonNote[]>("/sermon-notes/me"),
+
+  getById: (id: string) =>
+    authedFetch<SermonNote>(`/sermon-notes/${id}`),
+
+  getServiceTypes: () =>
+    authedFetch<string[]>("/sermon-notes/service-types"),
+
+  create: (data: CreateSermonNoteRequest) =>
+    authedFetch<SermonNote>("/sermon-notes", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: UpdateSermonNoteRequest) =>
+    authedFetch<SermonNote>(`/sermon-notes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    authedFetch<void>(`/sermon-notes/${id}`, { method: "DELETE" }),
+};
 
 export const eventsApi = {
   getByMonth: (entityId: string, entityType: string, year: number, month: number) =>

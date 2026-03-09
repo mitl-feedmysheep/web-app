@@ -187,6 +187,36 @@ export interface JoinRequest {
   createdAt: string;
 }
 
+export interface SermonNote {
+  id: string;
+  title: string;
+  sermonDate: string;
+  preacher: string | null;
+  serviceType: string | null;
+  scripture: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSermonNoteRequest {
+  title: string;
+  sermonDate: string;
+  preacher?: string;
+  serviceType?: string;
+  scripture?: string;
+  content: string;
+}
+
+export interface UpdateSermonNoteRequest {
+  title: string;
+  sermonDate: string;
+  preacher?: string;
+  serviceType?: string;
+  scripture?: string;
+  content: string;
+}
+
 export interface MemberSearchResult {
   memberId: string;
   name: string;
