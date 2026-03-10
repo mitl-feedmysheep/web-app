@@ -9,6 +9,7 @@ import SignupPage from "@/features/auth/SignupPage";
 import ResetPasswordPage from "@/features/auth/ResetPasswordPage";
 import RequestChurchPage from "@/features/auth/RequestChurchPage";
 import PendingApprovalPage from "@/features/auth/PendingApprovalPage";
+import ProvisionPage from "@/features/auth/ProvisionPage";
 import HomePage from "@/features/home/HomePage";
 import GroupListPage from "@/features/group/GroupListPage";
 import GroupDetailPage from "@/features/group/GroupDetailPage";
@@ -54,6 +55,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/request-church" element={<RequestChurchPage />} />
           <Route path="/pending-approval" element={<PendingApprovalPage />} />
+          <Route path="/provision/email" element={<ProvisionPage />} />
 
           {/* Protected - requires auth token */}
           <Route element={<ProtectedRoute />}>
