@@ -105,11 +105,9 @@ function ProvisionPage() {
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      // 1) 이메일 변경 + is_provisioned = false
+      // 이메일 변경 + 비밀번호 변경 + is_provisioned = false
       const token = localStorage.getItem("provisionToken") || undefined;
-      await membersApi.changeEmail(email, token);
-      // 2) 비밀번호 변경
-      await authApi.resetPassword(email, password);
+      await membersApi.completeProvision(email, password, token);
       // 정리
       try {
         localStorage.removeItem("provisionToken");
@@ -259,23 +257,17 @@ function ProvisionPage() {
                 </p>
               )}
             </div>
+
+            <Button
+              className="w-full"
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+            >
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {submitting ? "설정 중..." : "완료"}
+            </Button>
           </>
         )}
-      </div>
-
-      {/* Bottom fixed */}
-      {emailVerifySuccess && (
-        <div className="sticky bottom-0 border-t bg-background px-4 py-3">
-          <Button
-            className="w-full"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-          >
-            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {submitting ? "설정 중..." : "완료"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

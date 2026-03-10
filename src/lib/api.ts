@@ -189,6 +189,15 @@ export const membersApi = {
       body: JSON.stringify({ newEmail }),
     }),
 
+  completeProvision: (newEmail: string, newPassword: string, tokenOverride?: string) =>
+    authedFetch<void>("/members/provision/complete", {
+      method: "POST",
+      headers: tokenOverride
+        ? { Authorization: tokenOverride }
+        : undefined,
+      body: JSON.stringify({ newEmail, newPassword }),
+    }),
+
   updateMyInfo: (payload: {
     id: string;
     name: string;
