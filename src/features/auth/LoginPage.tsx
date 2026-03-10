@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,17 @@ import { authApi, churchesApi, ApiError } from "@/lib/api";
 
 function LoginPage() {
   const navigate = useNavigate();
+
+  // 로그인 화면 진입 시 provision 잔여 데이터 정리
+  useEffect(() => {
+    try {
+      localStorage.removeItem("provisionToken");
+      localStorage.removeItem("provisionPending");
+      localStorage.removeItem("provision.email");
+      localStorage.removeItem("provision.step");
+      localStorage.removeItem("provision.verified");
+    } catch {}
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
