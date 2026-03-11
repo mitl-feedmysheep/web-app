@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
+import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
 import { membersApi, churchesApi, messagesApi, notificationsApi } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
