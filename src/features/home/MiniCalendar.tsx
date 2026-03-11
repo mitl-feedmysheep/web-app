@@ -10,6 +10,7 @@ interface CalendarEvent {
   description?: string;
   time?: string;
   location?: string;
+  color: string;
 }
 
 interface WeekEventSegment {
@@ -23,6 +24,24 @@ interface WeekEventSegment {
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const MAX_VISIBLE_LANES = 2;
+
+// Google Calendar 스타일 색상 (API color 값 → 스타일 매핑)
+const EVENT_COLORS: Record<string, { dot: string; bar: string; barHover: string }> = {
+  PEACOCK: { dot: "bg-[#039BE5]", bar: "bg-[#039BE5]/80", barHover: "hover:bg-[#039BE5]" },
+  TOMATO: { dot: "bg-[#D50000]", bar: "bg-[#D50000]/80", barHover: "hover:bg-[#D50000]" },
+  SAGE: { dot: "bg-[#33B679]", bar: "bg-[#33B679]/80", barHover: "hover:bg-[#33B679]" },
+  TANGERINE: { dot: "bg-[#F4511E]", bar: "bg-[#F4511E]/80", barHover: "hover:bg-[#F4511E]" },
+  LAVENDER: { dot: "bg-[#7986CB]", bar: "bg-[#7986CB]/80", barHover: "hover:bg-[#7986CB]" },
+  FLAMINGO: { dot: "bg-[#E67C73]", bar: "bg-[#E67C73]/80", barHover: "hover:bg-[#E67C73]" },
+  BANANA: { dot: "bg-[#F09300]", bar: "bg-[#F09300]/80", barHover: "hover:bg-[#F09300]" },
+  GRAPHITE: { dot: "bg-[#616161]", bar: "bg-[#616161]/80", barHover: "hover:bg-[#616161]" },
+};
+
+const DEFAULT_COLOR = EVENT_COLORS.PEACOCK;
+
+function getEventColor(colorName: string): { dot: string; bar: string; barHover: string } {
+  return EVENT_COLORS[colorName] ?? DEFAULT_COLOR;
+}
 
 function normalizeTime(raw: unknown): string | undefined {
   if (!raw) return undefined;
@@ -67,6 +86,7 @@ function toCalendarEvent(ev: EventItem): CalendarEvent {
     description: ev.description,
     time,
     location: ev.location,
+    color: ev.color,
   };
 }
 
@@ -362,7 +382,7 @@ function MiniCalendar() {
                           {singleDayEvts.slice(0, 2).map((ev) => (
                             <span
                               key={ev.id}
-                              className="h-1 w-1 rounded-full bg-primary"
+                              className={`h-1 w-1 rounded-full ${getEventColor(ev.color).dot}`}
                             />
                           ))}
                           {singleDayEvts.length > 2 && (
@@ -389,7 +409,7 @@ function MiniCalendar() {
                       <button
                         key={`${seg.event.id}-${weekIdx}`}
                         type="button"
-                        className={`absolute h-[4px] bg-primary/80 hover:bg-primary transition-colors ${roundedL} ${roundedR}`}
+                        className={`absolute h-[3px] ${getEventColor(seg.event.color).bar} ${getEventColor(seg.event.color).barHover} transition-colors ${roundedL} ${roundedR}`}
                         style={{ left: `${left}%`, width: `${width}%`, top }}
                         onClick={() => setSelectedEvent(seg.event)}
                       >
@@ -437,7 +457,7 @@ function MiniCalendar() {
                     className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50 ${isPast ? "opacity-45" : ""}`}
                     onClick={() => setSelectedEvent(ev)}
                   >
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${isPast ? "bg-muted-foreground" : "bg-primary"}`} />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${isPast ? "bg-muted-foreground" : getEventColor(ev.color).dot}`} />
                     <span className={`min-w-0 flex-1 truncate text-xs font-medium ${isPast ? "text-muted-foreground" : ""}`}>
                       {ev.title}
                     </span>
@@ -497,7 +517,7 @@ function MiniCalendar() {
                     setSelectedEvent(ev);
                   }}
                 >
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+                  <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${getEventColor(ev.color).dot}`} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium">{ev.title}</p>
                     {ev.time && (
@@ -524,7 +544,7 @@ function MiniCalendar() {
           >
             <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-primary" />
+                <span className={`h-3 w-3 rounded-full ${getEventColor(selectedEvent.color).dot}`} />
                 <h4 className="text-base font-bold">{selectedEvent.title}</h4>
               </div>
               <button

@@ -504,6 +504,7 @@ export interface EventItem {
   startTime?: unknown; // string "HH:mm" or array [H, M] depending on backend serialization
   endTime?: unknown;
   location?: string;
+  color: string; // PEACOCK, TOMATO, SAGE, TANGERINE, LAVENDER, FLAMINGO, BANANA, GRAPHITE
 }
 
 export const sermonNotesApi = {
