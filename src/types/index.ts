@@ -217,6 +217,23 @@ export interface UpdateSermonNoteRequest {
   content: string;
 }
 
+export interface HomeSummaryGoal {
+  groupName: string;
+  goal: string;
+}
+
+export interface HomeSummaryPrayer {
+  groupName: string;
+  prayerRequest: string;
+  description: string;
+  isAnswered: boolean;
+}
+
+export interface HomeSummary {
+  goals: HomeSummaryGoal[];
+  prayers: HomeSummaryPrayer[];
+}
+
 export interface MemberSearchResult {
   memberId: string;
   name: string;

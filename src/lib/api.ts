@@ -8,6 +8,7 @@ import type {
   GatheringDetail,
   GatheringResponse,
   Group,
+  HomeSummary,
   JoinRequest,
   LoginRequest,
   LoginResponse,
@@ -166,6 +167,8 @@ export const authApi = {
 
 export const membersApi = {
   getMyInfo: () => authedFetch<User>("/members/me"),
+
+  getHomeSummary: () => authedFetch<HomeSummary>("/members/me/home-summary"),
 
   verifyMember: async (email: string, name: string): Promise<boolean> => {
     await authedFetch<void>(

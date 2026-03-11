@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cake, Megaphone, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
 import { membersApi, churchesApi, messagesApi, notificationsApi } from "@/lib/api";
-import type { User } from "@/types";
+import type { User, HomeSummary } from "@/types";
+import WeeklySummaryCard from "./WeeklySummaryCard";
 import SendMessageModal from "./SendMessageModal";
 import MemberSearchModal from "./MemberSearchModal";
 import MiniCalendar from "./MiniCalendar";
@@ -21,6 +22,7 @@ function HomePage() {
   const [messageTarget, setMessageTarget] = useState<{ id: string; name: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
+  const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -52,6 +54,13 @@ function HomePage() {
         setUser(me);
       } catch {
         // ignore
+      }
+
+      try {
+        const summary = await membersApi.getHomeSummary();
+        setHomeSummary(summary);
+      } catch {
+        // ignore - fallback to greeting
       }
 
       try {
@@ -116,12 +125,18 @@ function HomePage() {
             </button>
           </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          오늘도 하나님의 은혜 안에서 좋은 하루 되세요
-        </p>
+        {homeSummary && (homeSummary.goals.length > 0 || homeSummary.prayers.length > 0) ? (
+          <div className="mt-2">
+            <WeeklySummaryCard goals={homeSummary.goals} prayers={homeSummary.prayers} />
+          </div>
+        ) : (
+          <p className="mt-1 text-sm text-muted-foreground">
+            오늘도 하나님의 은혜 안에서 좋은 하루 되세요
+          </p>
+        )}
       </section>
 
-      <section>
+      {/* <section>
         <div className="mb-2 flex items-center gap-2">
           <Megaphone className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold">공지사항</h3>
@@ -129,7 +144,7 @@ function HomePage() {
         <p className="py-4 text-center text-sm text-muted-foreground">
           공지사항이 없습니다.
         </p>
-      </section>
+      </section> */}
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
