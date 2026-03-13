@@ -8,6 +8,7 @@ import {
   UserPen,
   KeyRound,
   Church,
+  Building2,
   ChevronRight,
   LogOut,
   Loader2,
@@ -18,6 +19,7 @@ import type { User } from "@/types";
 const MENU_ITEMS = [
   { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
   { icon: KeyRound, label: "비밀번호 변경", path: "/my/password" },
+  { icon: Building2, label: "부서 전환", path: "/my/department" },
   { icon: Church, label: "교회 전환", path: "/select-church" },
 ] as const;
 
@@ -66,6 +68,11 @@ function MyPage() {
           <p className="text-sm text-muted-foreground">
             {user?.email ?? ""}
           </p>
+          {localStorage.getItem("departmentName") && (
+            <p className="mt-0.5 text-xs text-primary font-medium">
+              {localStorage.getItem("departmentName")}
+            </p>
+          )}
         </div>
       </section>
 

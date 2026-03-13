@@ -2,6 +2,8 @@ import type {
   Church,
   CreateGatheringRequest,
   CreateSermonNoteRequest,
+  Department,
+  DepartmentMember,
   EducationProgram,
   EducationProgress,
   Gathering,
@@ -233,9 +235,10 @@ export const churchesApi = {
       `/churches/${churchId}/birthday-members?month=${month}`
     ),
 
-  requestRegistration: (churchId: string) =>
+  requestRegistration: (churchId: string, departmentId?: string) =>
     authedFetch<JoinRequest>(`/churches/${churchId}/join-request`, {
       method: "POST",
+      body: departmentId ? JSON.stringify({ departmentId }) : undefined,
     }),
 
   getMyJoinRequests: () =>
@@ -261,6 +264,14 @@ export const churchesApi = {
     authedFetch<
       Array<{ groupId: string; groupName: string; leaderName: string | null }>
     >(`/churches/${churchId}/groups-with-leaders`),
+};
+
+export const departmentsApi = {
+  getByChurch: (churchId: string) =>
+    authedFetch<Department[]>(`/churches/${churchId}/departments`),
+
+  getMyDepartments: (churchId: string) =>
+    authedFetch<DepartmentMember[]>(`/churches/${churchId}/my-departments`),
 };
 
 export const groupsApi = {
