@@ -227,11 +227,11 @@ function MiniCalendar() {
   const month = viewDate.getMonth();
 
   const fetchEvents = useCallback(async (y: number, m: number) => {
-    const churchId = localStorage.getItem("churchId");
-    if (!churchId) return;
+    const departmentId = localStorage.getItem("departmentId");
+    if (!departmentId) return;
 
     try {
-      const data = await eventsApi.getByMonth(churchId, "CHURCH", y, m + 1);
+      const data = await eventsApi.getByMonth(departmentId, "DEPARTMENT", y, m + 1);
       setEvents(data.map(toCalendarEvent));
     } catch {
       setEvents([]);

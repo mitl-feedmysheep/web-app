@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
-import { membersApi, churchesApi, messagesApi, notificationsApi } from "@/lib/api";
+import { membersApi, churchesApi, departmentsApi, messagesApi, notificationsApi } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
 import SendMessageModal from "./SendMessageModal";
@@ -64,7 +64,9 @@ function HomePage() {
       }
 
       try {
-        const birthdayMembers = await churchesApi.getBirthdayMembers(churchId, currentMonth);
+        const departmentId = localStorage.getItem("departmentId");
+        if (!departmentId) throw new Error("no departmentId");
+        const birthdayMembers = await departmentsApi.getBirthdayMembers(departmentId, currentMonth);
         setBirthdays(birthdayMembers);
       } catch {
         setBirthdays([]);

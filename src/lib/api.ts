@@ -272,11 +272,26 @@ export const departmentsApi = {
 
   getMyDepartments: (churchId: string) =>
     authedFetch<DepartmentMember[]>(`/churches/${churchId}/my-departments`),
+
+  getBirthdayMembers: (departmentId: string, month: number) =>
+    authedFetch<Array<{ memberId: string; name: string; birthday: string; sex: "M" | "F" | null }>>(
+      `/departments/${departmentId}/birthday-members?month=${month}`
+    ),
+
+  getGroupsWithLeaders: (departmentId: string) =>
+    authedFetch<
+      Array<{ groupId: string; groupName: string; leaderName: string | null }>
+    >(`/departments/${departmentId}/groups-with-leaders`),
+
+  searchMembers: (departmentId: string, searchText: string) =>
+    authedFetch<MemberSearchResult[]>(
+      `/departments/${departmentId}/members/search?searchText=${encodeURIComponent(searchText)}`
+    ),
 };
 
 export const groupsApi = {
-  getGroupsByChurch: (churchId: string) =>
-    authedFetch<Group[]>(`/churches/${churchId}/groups`),
+  getGroupsByDepartment: (departmentId: string) =>
+    authedFetch<Group[]>(`/departments/${departmentId}/groups`),
 
   getGroupMembers: (groupId: string) =>
     authedFetch<User[]>(`/groups/${groupId}/members`),

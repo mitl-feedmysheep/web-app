@@ -28,10 +28,11 @@ function GroupManagePage() {
 
     const fetchAll = async () => {
       try {
-        const churchId = localStorage.getItem("churchId");
         const [memberData, groups] = await Promise.all([
           groupsApi.getGroupMembers(groupId),
-          churchId ? groupsApi.getGroupsByChurch(churchId) : Promise.resolve([]),
+          localStorage.getItem("departmentId")
+            ? groupsApi.getGroupsByDepartment(localStorage.getItem("departmentId")!)
+            : Promise.resolve([]),
         ]);
 
         if (!mounted) return;

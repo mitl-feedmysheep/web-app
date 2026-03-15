@@ -19,8 +19,8 @@ import type { User } from "@/types";
 const MENU_ITEMS = [
   { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
   { icon: KeyRound, label: "비밀번호 변경", path: "/my/password" },
-  { icon: Building2, label: "부서 전환", path: "/my/department" },
   { icon: Church, label: "교회 전환", path: "/select-church" },
+  { icon: Building2, label: "부서 전환", path: "/my/department" },
 ] as const;
 
 function MyPage() {
