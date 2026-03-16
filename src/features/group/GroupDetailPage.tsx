@@ -209,8 +209,8 @@ function GroupDetailPage() {
                                   className={cn(
                                     "flex h-4 w-4 items-center justify-center rounded-[3px] text-[9px] font-semibold",
                                     completedWeeks.includes(week)
-                                      ? "bg-amber-500 text-white"
-                                      : "bg-muted-foreground/10 text-muted-foreground/40"
+                                      ? "bg-amber-500 text-white shadow-sm"
+                                      : "bg-muted/80 text-muted-foreground/30"
                                   )}
                                 >
                                   {week}

@@ -28,6 +28,7 @@ function SelectDepartmentPage() {
         }
         const data = await departmentsApi.getMyDepartments(churchId);
         const depts = Array.isArray(data) ? data : [];
+
         setDepartments(depts);
       } catch {
         // silently handle

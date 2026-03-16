@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { authApi, churchesApi, ApiError } from "@/lib/api";
+import { authApi, churchesApi, departmentsApi, ApiError } from "@/lib/api";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -56,8 +56,24 @@ function LoginPage() {
       }
 
       if (churches.length === 1) {
-        localStorage.setItem("churchId", churches[0].id);
-        navigate("/", { replace: true });
+        const churchId = churches[0].id;
+        localStorage.setItem("churchId", churchId);
+
+        // 부서 조회 후 라우팅
+        try {
+          const depts = await departmentsApi.getMyDepartments(churchId);
+          if (depts.length === 1) {
+            localStorage.setItem("departmentId", depts[0].departmentId);
+            localStorage.setItem("departmentName", depts[0].departmentName ?? "");
+            navigate("/", { replace: true });
+          } else if (depts.length > 1) {
+            navigate("/my/department", { replace: true });
+          } else {
+            navigate("/", { replace: true });
+          }
+        } catch {
+          navigate("/", { replace: true });
+        }
       } else {
         navigate("/select-church", { replace: true });
       }

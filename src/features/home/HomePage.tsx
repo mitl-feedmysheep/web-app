@@ -30,9 +30,10 @@ function HomePage() {
 
   const fetchUnread = useCallback(async () => {
     try {
+      const departmentId = localStorage.getItem("departmentId") ?? undefined;
       const [msgResult, notifResult] = await Promise.allSettled([
         messagesApi.getUnreadCount(),
-        notificationsApi.getUnreadCount(),
+        notificationsApi.getUnreadCount(departmentId),
       ]);
       if (msgResult.status === "fulfilled") setUnreadCount(msgResult.value.count);
       if (notifResult.status === "fulfilled") setNotifUnreadCount(notifResult.value.count);

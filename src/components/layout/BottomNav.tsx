@@ -2,9 +2,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Users, Heart, BookOpen, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
+function getGroupLabel(): string {
+  const name = localStorage.getItem("departmentName");
+  if (!name || name === "전체") return "소그룹";
+  return name;
+}
+
+const BASE_NAV_ITEMS = [
   { path: "/", icon: Home, label: "홈" },
-  { path: "/groups", icon: Users, label: "소그룹" },
+  { path: "/groups", icon: Users, label: "" },
   { path: "/prayers", icon: Heart, label: "기도" },
   { path: "/sermon-notes", icon: BookOpen, label: "설교노트" },
   { path: "/my", icon: User, label: "MY" },
@@ -13,11 +19,13 @@ const NAV_ITEMS = [
 function BottomNav() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const groupLabel = getGroupLabel();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
-        {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
+        {BASE_NAV_ITEMS.map(({ path, icon: Icon, label }) => {
+          const displayLabel = path === "/groups" ? groupLabel : label;
           const isActive =
             path === "/"
               ? pathname === "/"
@@ -38,7 +46,7 @@ function BottomNav() {
                 className={cn("h-5 w-5", isActive && "fill-primary/20")}
                 strokeWidth={isActive ? 2.5 : 2}
               />
-              <span className="text-[11px] font-medium">{label}</span>
+              <span className="text-[11px] font-medium">{displayLabel}</span>
             </button>
           );
         })}

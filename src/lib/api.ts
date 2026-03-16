@@ -138,10 +138,7 @@ export const authApi = {
     }),
 
   logout: () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("churchId");
-    localStorage.removeItem("provisionToken");
-    localStorage.removeItem("provisionPending");
+    localStorage.clear();
   },
 
   isAuthenticated: (): boolean => !!localStorage.getItem("authToken"),
@@ -390,13 +387,15 @@ export const messagesApi = {
 };
 
 export const notificationsApi = {
-  getMyNotifications: () =>
-    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; isRead: boolean; createdAt: string }>>(
-      "/notifications"
+  getMyNotifications: (departmentId?: string) =>
+    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; departmentId: string | null; isRead: boolean; createdAt: string }>>(
+      departmentId ? `/notifications?departmentId=${departmentId}` : "/notifications"
     ),
 
-  getUnreadCount: () =>
-    authedFetch<{ count: number }>("/notifications/unread-count"),
+  getUnreadCount: (departmentId?: string) =>
+    authedFetch<{ count: number }>(
+      departmentId ? `/notifications/unread-count?departmentId=${departmentId}` : "/notifications/unread-count"
+    ),
 
   markAsRead: (id: string) =>
     authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),

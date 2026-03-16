@@ -27,7 +27,8 @@ function NotificationsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await notificationsApi.getMyNotifications();
+        const departmentId = localStorage.getItem("departmentId") ?? undefined;
+        const data = await notificationsApi.getMyNotifications(departmentId);
         setNotifications(data);
       } catch {
         setNotifications([]);
