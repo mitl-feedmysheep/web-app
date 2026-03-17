@@ -2,6 +2,8 @@ import type {
   Church,
   CreateGatheringRequest,
   CreateSermonNoteRequest,
+  Department,
+  DepartmentMember,
   EducationProgram,
   EducationProgress,
   Gathering,
@@ -136,10 +138,7 @@ export const authApi = {
     }),
 
   logout: () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("churchId");
-    localStorage.removeItem("provisionToken");
-    localStorage.removeItem("provisionPending");
+    localStorage.clear();
   },
 
   isAuthenticated: (): boolean => !!localStorage.getItem("authToken"),
@@ -233,9 +232,10 @@ export const churchesApi = {
       `/churches/${churchId}/birthday-members?month=${month}`
     ),
 
-  requestRegistration: (churchId: string) =>
+  requestRegistration: (churchId: string, departmentId?: string) =>
     authedFetch<JoinRequest>(`/churches/${churchId}/join-request`, {
       method: "POST",
+      body: departmentId ? JSON.stringify({ departmentId }) : undefined,
     }),
 
   getMyJoinRequests: () =>
@@ -263,9 +263,32 @@ export const churchesApi = {
     >(`/churches/${churchId}/groups-with-leaders`),
 };
 
+export const departmentsApi = {
+  getByChurch: (churchId: string) =>
+    authedFetch<Department[]>(`/churches/${churchId}/departments`),
+
+  getMyDepartments: (churchId: string) =>
+    authedFetch<DepartmentMember[]>(`/churches/${churchId}/my-departments`),
+
+  getBirthdayMembers: (departmentId: string, month: number) =>
+    authedFetch<Array<{ memberId: string; name: string; birthday: string; sex: "M" | "F" | null }>>(
+      `/departments/${departmentId}/birthday-members?month=${month}`
+    ),
+
+  getGroupsWithLeaders: (departmentId: string) =>
+    authedFetch<
+      Array<{ groupId: string; groupName: string; leaderName: string | null }>
+    >(`/departments/${departmentId}/groups-with-leaders`),
+
+  searchMembers: (departmentId: string, searchText: string) =>
+    authedFetch<MemberSearchResult[]>(
+      `/departments/${departmentId}/members/search?searchText=${encodeURIComponent(searchText)}`
+    ),
+};
+
 export const groupsApi = {
-  getGroupsByChurch: (churchId: string) =>
-    authedFetch<Group[]>(`/churches/${churchId}/groups`),
+  getGroupsByDepartment: (departmentId: string) =>
+    authedFetch<Group[]>(`/departments/${departmentId}/groups`),
 
   getGroupMembers: (groupId: string) =>
     authedFetch<User[]>(`/groups/${groupId}/members`),
@@ -364,13 +387,15 @@ export const messagesApi = {
 };
 
 export const notificationsApi = {
-  getMyNotifications: () =>
-    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; isRead: boolean; createdAt: string }>>(
-      "/notifications"
+  getMyNotifications: (departmentId?: string) =>
+    authedFetch<Array<{ id: string; type: string; entityType: string; entityId: string; targetUrl: string | null; departmentId: string | null; isRead: boolean; createdAt: string }>>(
+      departmentId ? `/notifications?departmentId=${departmentId}` : "/notifications"
     ),
 
-  getUnreadCount: () =>
-    authedFetch<{ count: number }>("/notifications/unread-count"),
+  getUnreadCount: (departmentId?: string) =>
+    authedFetch<{ count: number }>(
+      departmentId ? `/notifications/unread-count?departmentId=${departmentId}` : "/notifications/unread-count"
+    ),
 
   markAsRead: (id: string) =>
     authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),

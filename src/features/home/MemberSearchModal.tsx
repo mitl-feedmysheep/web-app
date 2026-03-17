@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { churchesApi } from "@/lib/api";
+import { departmentsApi } from "@/lib/api";
 import type { MemberSearchResult } from "@/types";
 import { Search, Loader2, Phone, MapPin, Briefcase, Brain, Droplets, Mail } from "lucide-react";
 import SendMessageModal from "./SendMessageModal";
@@ -26,15 +26,15 @@ function MemberSearchModal({ open, onClose }: MemberSearchModalProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const doSearch = useCallback(async (text: string) => {
-    const churchId = localStorage.getItem("churchId");
-    if (!churchId || !text.trim()) {
+    const departmentId = localStorage.getItem("departmentId");
+    if (!departmentId || !text.trim()) {
       setResults([]);
       setSearched(false);
       return;
     }
     setLoading(true);
     try {
-      const data = await churchesApi.searchMembers(churchId, text.trim());
+      const data = await departmentsApi.searchMembers(departmentId, text.trim());
       setResults(data);
       setSearched(true);
     } catch {

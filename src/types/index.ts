@@ -234,6 +234,24 @@ export interface HomeSummary {
   prayers: HomeSummaryPrayer[];
 }
 
+export interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+  churchId: string;
+  isDefault: boolean;
+}
+
+export interface DepartmentMember {
+  id: string;
+  departmentId: string;
+  departmentName: string | null;
+  memberId: string;
+  memberName: string;
+  role: "MEMBER" | "LEADER" | "ADMIN";
+  status: "ACTIVE" | "GRADUATED";
+}
+
 export interface MemberSearchResult {
   memberId: string;
   name: string;

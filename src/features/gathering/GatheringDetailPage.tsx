@@ -1040,13 +1040,13 @@ function MemberCard({
                   disabled={!canEdit || (isCompleted && !thisGatheringProg)}
                   onClick={() => onEducationToggle(member.groupMemberId, week, thisGatheringProg?.id)}
                   className={cn(
-                    "h-7 w-7 rounded text-[11px] font-medium transition-all",
+                    "relative h-7 w-7 rounded text-[11px] font-medium transition-all",
                     isCompleted
                       ? thisGatheringProg
                         ? "bg-amber-500 text-white"
-                        : "bg-amber-200 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"
-                      : "bg-muted text-muted-foreground hover:bg-muted-foreground/20",
-                    (!canEdit || (isCompleted && !thisGatheringProg)) && "opacity-50 cursor-not-allowed"
+                        : "bg-amber-500 text-white"
+                      : "bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/50",
+                    (!canEdit || (isCompleted && !thisGatheringProg)) && "cursor-not-allowed"
                   )}
                   title={
                     isCompleted && !thisGatheringProg
@@ -1054,6 +1054,9 @@ function MemberCard({
                       : `${week}주차`
                   }
                 >
+                  {isCompleted && !thisGatheringProg && (
+                    <span className="absolute top-0 right-0.5 text-[7px] text-white font-bold">✓</span>
+                  )}
                   {week}
                 </button>
               );

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Loader2, HandHeart } from "lucide-react";
-import { groupsApi, churchesApi } from "@/lib/api";
+import { groupsApi, departmentsApi } from "@/lib/api";
 import type { Group, GroupType } from "@/types";
 
 interface GroupLeaderInfo {
@@ -42,11 +42,11 @@ function GroupListPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const churchId = localStorage.getItem("churchId");
-        if (!churchId) return;
+        const departmentId = localStorage.getItem("departmentId");
+        if (!departmentId) return;
         const [myGroups, churchGroups] = await Promise.all([
-          groupsApi.getGroupsByChurch(churchId),
-          churchesApi.getGroupsWithLeaders(churchId),
+          groupsApi.getGroupsByDepartment(departmentId),
+          departmentsApi.getGroupsWithLeaders(departmentId),
         ]);
         setGroups(myGroups);
         setAllGroups(churchGroups);

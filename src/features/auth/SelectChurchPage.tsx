@@ -8,7 +8,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { churchesApi } from "@/lib/api";
+import { churchesApi, departmentsApi } from "@/lib/api";
 import type { Church } from "@/types";
 
 function SelectChurchPage() {
@@ -30,9 +30,23 @@ function SelectChurchPage() {
     load();
   }, []);
 
-  const handleSelect = (church: Church) => {
+  const handleSelect = async (church: Church) => {
     localStorage.setItem("churchId", church.id);
-    navigate("/", { replace: true });
+
+    try {
+      const depts = await departmentsApi.getMyDepartments(church.id);
+      if (depts.length === 1) {
+        localStorage.setItem("departmentId", depts[0].departmentId);
+        localStorage.setItem("departmentName", depts[0].departmentName ?? "");
+        navigate("/", { replace: true });
+      } else if (depts.length > 1) {
+        navigate("/my/department", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    } catch {
+      navigate("/", { replace: true });
+    }
   };
 
   if (loading) {
