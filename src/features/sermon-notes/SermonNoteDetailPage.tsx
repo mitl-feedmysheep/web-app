@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { sermonNotesApi, ApiError } from "@/lib/api";
+import { generateHTML } from "@tiptap/html";
+import { getSermonNoteRenderExtensions } from "@/lib/tiptap-utils";
 import { toast } from "sonner";
 import type { SermonNote } from "@/types";
 
@@ -69,10 +71,17 @@ function SermonNoteDetailPage() {
   const d = new Date(note.sermonDate + "T00:00:00");
   const dateStr = `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 
-  const paragraphs = note.content
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  let contentHtml: string;
+  try {
+    const json = JSON.parse(note.content);
+    contentHtml = generateHTML(json, getSermonNoteRenderExtensions());
+  } catch {
+    // 기존 plain text fallback
+    contentHtml = note.content
+      .split(/\n/)
+      .map((line) => `<p>${line}</p>`)
+      .join("");
+  }
 
   return (
     <div className="min-h-dvh pb-8">
@@ -148,16 +157,10 @@ function SermonNoteDetailPage() {
         </div>
 
         {/* Content */}
-        <article className="space-y-4 pb-4">
-          {paragraphs.map((paragraph, i) => (
-            <p
-              key={i}
-              className="whitespace-pre-wrap text-[15px] leading-[1.8] text-foreground/85"
-            >
-              {paragraph}
-            </p>
-          ))}
-        </article>
+        <article
+          className="sermon-note-content pb-4 text-[15px] leading-[1.8] text-foreground/85"
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
+        />
       </div>
 
       {/* Delete Confirmation Dialog */}

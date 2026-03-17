@@ -104,3 +104,44 @@
   animation: highlight-border 1.5s ease-in-out;
   border-radius: var(--radius);
 }
+
+/* tiptap sermon note editor */
+.sermon-note-editor .tiptap {
+  min-height: 16rem;
+  outline: none;
+  line-height: 1.8;
+}
+
+.sermon-note-editor .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  opacity: 0.5;
+  pointer-events: none;
+  height: 0;
+}
+
+.sermon-note-editor .tiptap ul,
+.sermon-note-content ul {
+  padding-left: 1.2em;
+}
+
+.sermon-note-editor .tiptap ul li,
+.sermon-note-content ul li {
+  list-style-type: disc;
+}
+
+.sermon-note-editor .tiptap ul ul li,
+.sermon-note-content ul ul li {
+  list-style-type: circle;
+}
+
+.sermon-note-editor .tiptap ul ul ul li,
+.sermon-note-content ul ul ul li {
+  list-style-type: square;
+}
+
+.sermon-note-editor .tiptap ul li p,
+.sermon-note-content ul li p {
+  margin: 0;
+}

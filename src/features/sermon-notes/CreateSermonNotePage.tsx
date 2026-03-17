@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { SermonNoteEditor } from "@/components/ui/sermon-note-editor";
 import { sermonNotesApi, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { JSONContent, Editor } from "@tiptap/react";
 
 function CreateSermonNotePage() {
   const { id } = useParams<{ id: string }>();
@@ -20,17 +21,35 @@ function CreateSermonNotePage() {
   const [preacher, setPreacher] = useState("");
   const [serviceType, setServiceType] = useState("");
   const [scripture, setScripture] = useState("");
-  const [content, setContent] = useState("");
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
 
-  const [serviceTypeSuggestions, setServiceTypeSuggestions] = useState<string[]>([]);
+  const editorRef = useRef<Editor | null>(null);
+  const [initialContent, setInitialContent] = useState<
+    JSONContent | undefined
+  >(undefined);
+
+  const handleEditorRef = useCallback((editor: Editor | null) => {
+    editorRef.current = editor;
+  }, []);
+
+  const handleEditorChange = useCallback((isEmpty: boolean) => {
+    setHasContent(!isEmpty);
+  }, []);
+
+  const [serviceTypeSuggestions, setServiceTypeSuggestions] = useState<
+    string[]
+  >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const serviceTypeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    sermonNotesApi.getServiceTypes().then(setServiceTypeSuggestions).catch(() => {});
+    sermonNotesApi
+      .getServiceTypes()
+      .then(setServiceTypeSuggestions)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -43,10 +62,18 @@ function CreateSermonNotePage() {
         setPreacher(note.preacher ?? "");
         setServiceType(note.serviceType ?? "");
         setScripture(note.scripture ?? "");
-        setContent(note.content);
+        try {
+          setInitialContent(JSON.parse(note.content));
+          setHasContent(true);
+        } catch {
+          // 레거시 plain text — 에디터에 로드 불가
+          setInitialContent(undefined);
+        }
       } catch (err) {
         toast.error(
-          err instanceof ApiError ? err.message : "노트를 불러오지 못했습니다."
+          err instanceof ApiError
+            ? err.message
+            : "노트를 불러오지 못했습니다."
         );
         navigate("/sermon-notes");
       } finally {
@@ -58,7 +85,10 @@ function CreateSermonNotePage() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (serviceTypeRef.current && !serviceTypeRef.current.contains(e.target as Node)) {
+      if (
+        serviceTypeRef.current &&
+        !serviceTypeRef.current.contains(e.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -67,13 +97,14 @@ function CreateSermonNotePage() {
   }, []);
 
   const filteredSuggestions = serviceTypeSuggestions.filter(
-    (s) => s.toLowerCase().includes(serviceType.toLowerCase()) && s !== serviceType
+    (s) =>
+      s.toLowerCase().includes(serviceType.toLowerCase()) && s !== serviceType
   );
 
-  const canSubmit = title.trim() && sermonDate && content.trim() && !saving;
+  const canSubmit = title.trim() && sermonDate && hasContent && !saving;
 
   const handleSubmit = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !editorRef.current) return;
     setSaving(true);
 
     const payload = {
@@ -82,7 +113,7 @@ function CreateSermonNotePage() {
       preacher: preacher.trim() || undefined,
       serviceType: serviceType.trim() || undefined,
       scripture: scripture.trim() || undefined,
-      content: content.trim(),
+      content: JSON.stringify(editorRef.current.getJSON()),
     };
 
     try {
@@ -231,17 +262,15 @@ function CreateSermonNotePage() {
           />
         </div>
 
-        {/* Content */}
+        {/* Content - tiptap editor */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground">
             나의 노트 <span className="text-destructive">*</span>
           </label>
-          <Textarea
-            placeholder="설교를 들으며 느낀 점, 깨달은 점을 자유롭게 적어보세요..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={12}
-            className="resize-none"
+          <SermonNoteEditor
+            initialContent={initialContent}
+            onChange={handleEditorChange}
+            editorRef={handleEditorRef}
           />
         </div>
       </div>

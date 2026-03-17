@@ -5,6 +5,7 @@ import { BookOpen, Plus, Loader2, Calendar, User as UserIcon } from "lucide-reac
 import { sermonNotesApi, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { extractTextFromTiptapJson } from "@/lib/tiptap-utils";
 import type { SermonNote } from "@/types";
 
 function SermonNotesPage() {
@@ -118,7 +119,7 @@ function NoteCard({
           )}
 
           <p className="text-xs text-muted-foreground/70 line-clamp-2 leading-relaxed">
-            {note.content}
+            {extractTextFromTiptapJson(note.content)}
           </p>
 
           <div className="flex items-center gap-3 pt-0.5">
