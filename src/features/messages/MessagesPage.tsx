@@ -17,6 +17,7 @@ type Tab = "received" | "sent";
 
 const TYPE_EMOJI: Record<string, string> = {
   BIRTHDAY: "🎉",
+  ADMIN_REQUEST: "📋",
 };
 
 function MessagesPage() {
