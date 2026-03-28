@@ -14,6 +14,7 @@ export interface FloatingBadge {
   right?: string;
   left?: string;
   callout?: boolean;
+  calloutDirection?: "right" | "up";
 }
 
 export interface OnboardingSlideData {
@@ -45,7 +46,7 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     tooltipText: "📋 홈에서는 이번 주 소그룹에서 나눈 나의 한 주 목표와 기도제목을 확인할 수 있어요",
     activeTab: "/",
     activeTabLabel: "홈",
-    floatingBadge: { label: "교적부", top: "28px", right: "124px", callout: true },
+    floatingBadge: { label: "교적부", top: "58px", right: "10px", callout: true, calloutDirection: "up" },
   },
   {
     id: "home-birthday",

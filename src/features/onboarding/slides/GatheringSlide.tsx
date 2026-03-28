@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Clock, ChevronLeft, ChevronDown, ChevronUp, Heart, Target, FileText, Check } from "lucide-react";
+import { Calendar, MapPin, Clock, ChevronLeft, ChevronUp, Heart, Target, FileText, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import MockBottomNav from "../MockBottomNav";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,7 @@ function AttendanceChip({ label, checked }: { label: string; checked: boolean })
 function GatheringSlide() {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-hidden">
         <div className="space-y-4 px-4 py-4">
           {/* 상단 네비게이션 */}
           <button className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -65,25 +65,6 @@ function GatheringSlide() {
 
           {/* 멤버 카드들 */}
           <div className="space-y-3">
-            {/* 접힌 카드 */}
-            <Card className="border-0 bg-accent/40 shadow-none">
-              <CardContent className="py-3">
-                <div className="flex cursor-pointer items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-sm font-medium text-primary">
-                      영희
-                    </div>
-                    <p className="font-semibold">이영희</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <AttendanceChip label="예배" checked={true} />
-                    <AttendanceChip label="모임" checked={false} />
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* 열린 카드 - data-highlight */}
             <Card data-highlight="" className="border-0 bg-accent/40 shadow-none">
               <CardContent className="py-3">
@@ -132,7 +113,6 @@ function GatheringSlide() {
                       {[
                         "직장 동료의 복음화를 위해 기도합니다.",
                         "부모님의 건강 회복을 위해 기도합니다.",
-                        "다음 주 중요한 발표를 위해 기도합니다.",
                       ].map((p) => (
                         <div key={p} className="flex items-start gap-2 rounded-lg bg-background px-3 py-2">
                           <Heart className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />

@@ -135,6 +135,18 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
       >
         <MockComponent />
 
+        {/* 마지막 슬라이드 시작하기 버튼 */}
+        {isLast && (
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end pb-16">
+            <button
+              className="pointer-events-auto rounded-2xl bg-primary px-10 py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-opacity hover:opacity-90"
+              onClick={onClose}
+            >
+              시작하기
+            </button>
+          </div>
+        )}
+
         {/* 컷아웃 오버레이 */}
         {hasHighlight && highlightRect && (
           <>
@@ -226,10 +238,21 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             {floatingBadge.callout ? (
               <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5 shadow-md">
                 <span className="text-sm font-semibold text-primary">{floatingBadge.label}</span>
-                {/* 오른쪽 말풍선 꼬리 (outer border) */}
-                <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[6px] border-b-[6px] border-l-[8px] border-t-transparent border-b-transparent border-l-primary/30" />
-                {/* 오른쪽 말풍선 꼬리 (inner fill) */}
-                <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[6px] border-t-transparent border-b-transparent border-l-white" />
+                {floatingBadge.calloutDirection === "up" ? (
+                  <>
+                    {/* 위쪽 말풍선 꼬리 (outer border) */}
+                    <div className="absolute -top-[8px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary/30" />
+                    {/* 위쪽 말풍선 꼬리 (inner fill) */}
+                    <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" />
+                  </>
+                ) : (
+                  <>
+                    {/* 오른쪽 말풍선 꼬리 (outer border) */}
+                    <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[6px] border-b-[6px] border-l-[8px] border-t-transparent border-b-transparent border-l-primary/30" />
+                    {/* 오른쪽 말풍선 꼬리 (inner fill) */}
+                    <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[6px] border-t-transparent border-b-transparent border-l-white" />
+                  </>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-1 rounded-full border border-primary/40 bg-white px-2.5 py-1 shadow-md">
@@ -246,7 +269,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {/* 왼쪽: 건너뛰기 */}
           <button
             onClick={onClose}
-            className="min-w-[56px] text-left text-sm text-white/60 transition-colors hover:text-white/90"
+            className="min-w-[80px] text-left text-sm text-white/60 transition-colors hover:text-white/90"
           >
             건너뛰기
           </button>
@@ -269,7 +292,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           </div>
 
           {/* 오른쪽: 이전/다음 화살표 */}
-          <div className="flex min-w-[56px] items-center justify-end gap-1">
+          <div className="flex min-w-[80px] items-center justify-between">
             <button
               onClick={goPrev}
               disabled={isFirst}
