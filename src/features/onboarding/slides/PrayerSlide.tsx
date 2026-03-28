@@ -1,4 +1,4 @@
-import { Heart, CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import MockBottomNav from "../MockBottomNav";
