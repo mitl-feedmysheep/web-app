@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Home, Users, Heart, BookOpen, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ONBOARDING_SLIDES } from "./onboarding-data";
+import { OnboardingCloseCtx } from "./onboarding-context";
 
 interface HighlightRect {
   top: number;
@@ -133,19 +134,9 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           animating ? "opacity-0" : "opacity-100"
         )}
       >
-        <MockComponent />
-
-        {/* 마지막 슬라이드 시작하기 버튼 */}
-        {isLast && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end pb-16">
-            <button
-              className="pointer-events-auto rounded-2xl bg-primary px-10 py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-opacity hover:opacity-90"
-              onClick={onClose}
-            >
-              시작하기
-            </button>
-          </div>
-        )}
+        <OnboardingCloseCtx.Provider value={onClose}>
+          <MockComponent />
+        </OnboardingCloseCtx.Provider>
 
         {/* 컷아웃 오버레이 */}
         {hasHighlight && highlightRect && (
@@ -305,15 +296,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <button
-              onClick={goNext}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-            >
-              {isLast
-                ? <span className="text-[11px] font-bold text-primary">시작</span>
-                : <ChevronRight className="h-5 w-5" />
-              }
-            </button>
+            {!isLast && (
+              <button
+                onClick={goNext}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
