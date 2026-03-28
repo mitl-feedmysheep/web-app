@@ -12,9 +12,12 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  CircleHelp,
 } from "lucide-react";
 import { authApi, membersApi } from "@/lib/api";
 import type { User } from "@/types";
+import OnboardingModal from "@/features/onboarding/OnboardingModal";
+import { useOnboarding } from "@/features/onboarding/useOnboarding";
 
 const MENU_ITEMS = [
   { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
@@ -27,6 +30,7 @@ function MyPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isOpen: onboardingOpen, open: openOnboarding, close: closeOnboarding } = useOnboarding();
 
   useEffect(() => {
     const load = async () => {
@@ -98,6 +102,19 @@ function MyPage() {
         </CardContent>
       </Card>
 
+      <Card className="border-0 shadow-md shadow-primary/5">
+        <CardContent className="p-0">
+          <button
+            onClick={openOnboarding}
+            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
+          >
+            <CircleHelp className="h-5 w-5 text-muted-foreground" />
+            <span className="flex-1 text-left text-sm font-medium">앱 사용법 보기</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </CardContent>
+      </Card>
+
       <Button
         variant="ghost"
         className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -106,6 +123,8 @@ function MyPage() {
         <LogOut className="mr-2 h-4 w-4" />
         로그아웃
       </Button>
+
+      <OnboardingModal isOpen={onboardingOpen} onClose={closeOnboarding} />
     </div>
   );
 }

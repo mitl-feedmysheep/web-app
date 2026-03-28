@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { authApi, churchesApi, departmentsApi, ApiError } from "@/lib/api";
+import OnboardingModal from "@/features/onboarding/OnboardingModal";
+import { useOnboarding } from "@/features/onboarding/useOnboarding";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { isOpen: onboardingOpen, open: openOnboarding, close: closeOnboarding, shouldAutoShow } = useOnboarding();
 
-  // 로그인 화면 진입 시 provision 잔여 데이터 정리
+  // 로그인 화면 진입 시 provision 잔여 데이터 정리 + 온보딩 자동 표시
   useEffect(() => {
     try {
       localStorage.removeItem("provisionToken");
@@ -18,6 +21,10 @@ function LoginPage() {
       localStorage.removeItem("provision.step");
       localStorage.removeItem("provision.verified");
     } catch {}
+
+    if (shouldAutoShow()) {
+      openOnboarding();
+    }
   }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -159,6 +166,15 @@ function LoginPage() {
           </div>
         </CardContent>
       </Card>
+
+      <button
+        onClick={openOnboarding}
+        className="mt-6 text-sm text-muted-foreground transition-colors hover:text-primary"
+      >
+        앱 둘러보기
+      </button>
+
+      <OnboardingModal isOpen={onboardingOpen} onClose={closeOnboarding} />
     </div>
   );
 }
