@@ -19,14 +19,14 @@ const TYPE_CONFIG = {
     icon: Users,
     bgColor: "bg-primary/10",
     iconColor: "text-primary",
-    badgeClass: "border-sky-200 bg-sky-100 text-sky-700 dark:border-sky-200 dark:bg-sky-100 dark:text-sky-700",
+    badgeClass: "border-sky-200 bg-sky-100 text-sky-700",
     label: "소모임",
   },
   NEWCOMER: {
     icon: HandHeart,
-    bgColor: "bg-rose-100 dark:bg-rose-100",
-    iconColor: "text-rose-500 dark:text-rose-500",
-    badgeClass: "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-200 dark:bg-rose-100 dark:text-rose-700",
+    bgColor: "bg-rose-100",
+    iconColor: "text-rose-500",
+    badgeClass: "border-rose-200 bg-rose-100 text-rose-700",
     label: "새가족부",
   },
 };
@@ -39,7 +39,7 @@ function GroupSlide() {
           <div>
             <h1 className="text-lg font-bold">소그룹</h1>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              <span className="font-semibold text-sky-700 dark:text-sky-300">청년부</span>
+              <span className="font-semibold text-sky-700">청년부</span>
               {" · 내가 속한 부서에요"}
             </p>
           </div>

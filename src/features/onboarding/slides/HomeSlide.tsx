@@ -117,7 +117,7 @@ function HomeSlide({ section }: HomeSlideProps) {
                   </div>
                 ))}
               </div>
-              <div className="mt-2 flex items-center gap-2 rounded-lg bg-sky-50 px-2 py-1.5 dark:bg-sky-950">
+              <div className="mt-2 flex items-center gap-2 rounded-lg bg-sky-50 px-2 py-1.5">
                 <div className="h-2 w-2 rounded-full bg-sky-400" />
                 <span className="text-[11px] font-medium">3/27 청년부 수요 예배</span>
               </div>

@@ -30,8 +30,8 @@ function IntroSlide() {
               ].map(({ name, highlight }) => (
                 <div key={name} className="flex flex-col items-center">
                   <div className="mb-1 h-3 w-px bg-border" />
-                  <div className={`rounded-md border px-3 py-1.5 ${highlight ? "border-sky-300 bg-sky-50 dark:bg-sky-950" : "border-border bg-muted/50"}`}>
-                    <span className={`text-xs font-semibold ${highlight ? "text-sky-700 dark:text-sky-300" : "text-muted-foreground"}`}>{name}</span>
+                  <div className={`rounded-md border px-3 py-1.5 ${highlight ? "border-sky-300 bg-sky-50" : "border-border bg-muted/50"}`}>
+                    <span className={`text-xs font-semibold ${highlight ? "text-sky-700" : "text-muted-foreground"}`}>{name}</span>
                   </div>
                 </div>
               ))}
@@ -48,8 +48,8 @@ function IntroSlide() {
                 ].map(({ name, members }) => (
                   <div key={name} className="flex flex-col items-center">
                     <div className="mb-1 h-3 w-px bg-border" />
-                    <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 dark:bg-emerald-950">
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">{name}</span>
+                    <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5">
+                      <span className="text-xs font-semibold text-emerald-700">{name}</span>
                     </div>
                     {/* 개인 */}
                     <div className="mt-1 h-3 w-px bg-border" />

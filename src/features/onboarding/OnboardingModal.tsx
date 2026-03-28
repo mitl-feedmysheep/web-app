@@ -165,16 +165,16 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             {/* 툴팁 - 부드러운 폰트, 검은색 */}
             {tooltipText && (
               <div
-                className="absolute left-4 right-4 z-[115] rounded-2xl bg-white px-4 py-3.5 shadow-xl dark:bg-gray-900"
+                className="absolute left-4 right-4 z-[115] rounded-2xl bg-white px-4 py-3.5 shadow-xl"
                 style={getTooltipStyle()}
               >
                 {tooltipPosition === "bottom" ? (
-                  <div className="absolute -top-2 left-8 h-0 w-0 border-x-8 border-b-8 border-x-transparent border-b-white dark:border-b-gray-900" />
+                  <div className="absolute -top-2 left-8 h-0 w-0 border-x-8 border-b-8 border-x-transparent border-b-white" />
                 ) : (
-                  <div className="absolute -bottom-2 left-8 h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-white dark:border-t-gray-900" />
+                  <div className="absolute -bottom-2 left-8 h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-white" />
                 )}
                 <p
-                  className="text-sm leading-relaxed dark:text-white"
+                  className="text-sm leading-relaxed"
                   style={{ fontFamily: "'Nanum Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif", fontWeight: 400, color: "#0f0f0f" }}
                 >
                   {tooltipText}
@@ -224,15 +224,15 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             }}
           >
             {floatingBadge.callout ? (
-              <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5 shadow-md dark:bg-gray-900">
+              <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5 shadow-md">
                 <span className="text-sm font-semibold text-primary">{floatingBadge.label}</span>
                 {/* 오른쪽 말풍선 꼬리 (outer border) */}
                 <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[6px] border-b-[6px] border-l-[8px] border-t-transparent border-b-transparent border-l-primary/30" />
                 {/* 오른쪽 말풍선 꼬리 (inner fill) */}
-                <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[6px] border-t-transparent border-b-transparent border-l-white dark:border-l-gray-900" />
+                <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[6px] border-t-transparent border-b-transparent border-l-white" />
               </div>
             ) : (
-              <div className="flex items-center gap-1 rounded-full border border-primary/40 bg-white px-2.5 py-1 shadow-md dark:bg-gray-900">
+              <div className="flex items-center gap-1 rounded-full border border-primary/40 bg-white px-2.5 py-1 shadow-md">
                 <span className="text-[11px] font-semibold text-primary">{floatingBadge.label}</span>
               </div>
             )}
