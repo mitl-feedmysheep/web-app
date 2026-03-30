@@ -17,7 +17,7 @@ function HomeSlide({ section }: HomeSlideProps) {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">김창수님, 반가워요! 👋</h2>
               <div className="flex items-center gap-1">
-                <button type="button" className="relative shrink-0 p-1.5 text-primary/70">
+                <button type="button" className="relative shrink-0 p-1.5 text-primary/70" data-callout-target="">
                   <BookUser className="h-5 w-5" />
                 </button>
                 <button type="button" className="relative shrink-0 p-1.5 text-primary/70">

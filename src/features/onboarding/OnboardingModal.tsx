@@ -30,6 +30,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   const [animating, setAnimating] = useState(false);
   const [visible, setVisible] = useState(false);
   const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(null);
+  const [calloutTailRight, setCalloutTailRight] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -87,6 +88,31 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
     return () => cancelAnimationFrame(rafId);
   }, [currentIndex, animating, isOpen]);
 
+  useLayoutEffect(() => {
+    if (animating || !isOpen || !containerRef.current) return;
+
+    const slide = ONBOARDING_SLIDES[currentIndex];
+    if (slide.floatingBadge?.calloutDirection !== "up-right") {
+      setCalloutTailRight(null);
+      return;
+    }
+
+    const rafId = requestAnimationFrame(() => {
+      const target = containerRef.current?.querySelector("[data-callout-target]");
+      if (!target || !containerRef.current) { setCalloutTailRight(null); return; }
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const iconCenterX = targetRect.left + targetRect.width / 2 - containerRect.left;
+      // bubble의 right edge는 containerWidth - 16(floatingBadge right 값)
+      // tail center가 iconCenterX가 되려면: bubbleRightEdge - tailRightValue - 6(half tail width) = iconCenterX
+      const bubbleRightEdge = containerRect.width - 16;
+      setCalloutTailRight(Math.max(0, bubbleRightEdge - iconCenterX - 6));
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [currentIndex, animating, isOpen]);
+
+
   if (!isOpen) return null;
 
   const slide = ONBOARDING_SLIDES[currentIndex];
@@ -122,10 +148,14 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-[100] flex flex-col bg-background transition-opacity duration-300",
+        "fixed inset-0 z-[100] flex justify-center bg-black/70 transition-opacity duration-300",
         visible ? "opacity-100" : "opacity-0"
       )}
     >
+      <div
+        className="relative flex h-dvh w-full max-w-lg flex-col bg-background"
+        style={{ clipPath: "inset(0)" }}
+      >
       {/* 모의 화면 */}
       <div
         ref={containerRef}
@@ -227,7 +257,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             }}
           >
             {floatingBadge.callout ? (
-              <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5 shadow-md">
+              <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5">
                 <span className="text-sm font-semibold text-primary">{floatingBadge.label}</span>
                 {floatingBadge.calloutDirection === "up" ? (
                   <>
@@ -235,6 +265,19 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                     <div className="absolute -top-[8px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary/30" />
                     {/* 위쪽 말풍선 꼬리 (inner fill) */}
                     <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" />
+                  </>
+                ) : floatingBadge.calloutDirection === "up-right" ? (
+                  <>
+                    {/* 오른쪽 위 말풍선 꼬리 (outer border) - 교적부 아이콘 중심으로 동적 정렬 */}
+                    <div
+                      className="absolute -top-[8px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary/30"
+                      style={{ right: calloutTailRight !== null ? `${calloutTailRight}px` : "82px" }}
+                    />
+                    {/* 오른쪽 위 말풍선 꼬리 (inner fill) */}
+                    <div
+                      className="absolute -top-[6px] h-0 w-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent border-b-white"
+                      style={{ right: calloutTailRight !== null ? `${calloutTailRight}px` : "82px" }}
+                    />
                   </>
                 ) : (
                   <>
@@ -306,6 +349,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>,
     document.body
