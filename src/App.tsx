@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import AppShell from "@/components/layout/AppShell";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SplashScreen from "@/features/auth/SplashScreen";
@@ -33,6 +33,17 @@ function isSplashEnabled(): boolean {
   return localStorage.getItem("splash.seen") !== "true";
 }
 
+function SwNavigateHandler() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    (window as Window & { __swNavigate?: (url: string) => void }).__swNavigate = navigate;
+    return () => {
+      delete (window as Window & { __swNavigate?: (url: string) => void }).__swNavigate;
+    };
+  }, [navigate]);
+  return null;
+}
+
 function App() {
   const [showSplash, setShowSplash] = useState(isSplashEnabled);
 
@@ -47,6 +58,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <SwNavigateHandler />
       <Routes>
         <Route element={<AppShell />}>
           {/* Public - Auth */}

@@ -15,9 +15,11 @@ import {
   CircleHelp,
 } from "lucide-react";
 import { authApi, membersApi } from "@/lib/api";
+import { unsubscribe as pushUnsubscribe } from "@/lib/push";
 import type { User } from "@/types";
 import OnboardingModal from "@/features/onboarding/OnboardingModal";
 import { useOnboarding } from "@/features/onboarding/useOnboarding";
+import { NotificationToggleRow } from "./components/NotificationToggleRow";
 
 const MENU_ITEMS = [
   { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
@@ -46,7 +48,13 @@ function MyPage() {
     load();
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await Promise.race([
+        pushUnsubscribe(),
+        new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+      ]);
+    } catch {}
     authApi.logout();
     navigate("/login", { replace: true });
   };
@@ -99,6 +107,12 @@ function MyPage() {
               )}
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md shadow-primary/5">
+        <CardContent className="p-0">
+          <NotificationToggleRow />
         </CardContent>
       </Card>
 

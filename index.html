@@ -39,6 +39,11 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(() => {})
         })
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'navigate' && event.data.url) {
+            window.__swNavigate && window.__swNavigate(event.data.url)
+          }
+        })
       }
     </script>
   </head>

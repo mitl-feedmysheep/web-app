@@ -564,3 +564,20 @@ export const eventsApi = {
       `/events?entityId=${entityId}&entityType=${entityType}&year=${year}&month=${month}`,
     ),
 };
+
+export const pushApi = {
+  getVapidPublicKey: () =>
+    authedFetch<{ publicKey: string }>("/push/vapid-public-key"),
+
+  subscribe: (body: { endpoint: string; p256dh: string; auth: string; userAgent?: string; timezone?: string }) =>
+    authedFetch<void>("/push/subscriptions", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  unsubscribe: (body: { endpoint: string }) =>
+    authedFetch<void>("/push/subscriptions", {
+      method: "DELETE",
+      body: JSON.stringify(body),
+    }),
+};
