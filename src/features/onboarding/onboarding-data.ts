@@ -31,6 +31,7 @@ export interface OnboardingSlideData {
 }
 
 const HomeSummarySlide = () => HomeSlide({ section: "summary" });
+const HomeAnnouncementSlide = () => HomeSlide({ section: "announcement" });
 const HomeBirthdaySlide = () => HomeSlide({ section: "birthday" });
 
 export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
@@ -48,6 +49,15 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     activeTab: "/",
     activeTabLabel: "홈",
     floatingBadge: { label: "교적부 기능도 사용할 수 있어요", top: "58px", right: "16px", callout: true, calloutDirection: "up-right" },
+  },
+  {
+    id: "home-announcement",
+    MockComponent: HomeAnnouncementSlide,
+    hasHighlight: true,
+    tooltipPosition: "bottom",
+    tooltipText: "📢 부서 공지사항을 확인할 수 있어요. 새 공지가 오면 푸시 알림도 받아볼 수 있어요",
+    activeTab: "/",
+    activeTabLabel: "홈",
   },
   {
     id: "home-birthday",

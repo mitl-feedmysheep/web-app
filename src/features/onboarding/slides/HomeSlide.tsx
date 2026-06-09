@@ -1,9 +1,9 @@
-import { BookUser, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart } from "lucide-react";
+import { BookUser, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart, Megaphone, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MockBottomNav from "../MockBottomNav";
 
 interface HomeSlideProps {
-  section: "summary" | "birthday";
+  section: "summary" | "announcement" | "birthday";
 }
 
 function HomeSlide({ section }: HomeSlideProps) {
@@ -66,6 +66,30 @@ function HomeSlide({ section }: HomeSlideProps) {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </section>
+
+          {/* 공지사항 */}
+          <section {...(section === "announcement" ? { "data-highlight": "" } : {})}>
+            <div className="mb-2 flex items-baseline justify-between">
+              <div className="flex items-center gap-2">
+                <Megaphone className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold">공지사항</h3>
+              </div>
+              <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                더보기 <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+            <div className="space-y-2">
+              {[
+                { title: "4월 수련회 안내", body: "오는 4월 12-13일 청평 수련회가 있습니다. 참가 신청은 3월 31일까지!" },
+                { title: "주일 예배 장소 변경", body: "4월 첫째 주 주일 예배는 본관 2층 대강당에서 진행됩니다." },
+              ].map((item) => (
+                <div key={item.title} className="w-full rounded-lg bg-accent/50 px-3 py-2.5">
+                  <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.body}</p>
+                </div>
+              ))}
             </div>
           </section>
 
