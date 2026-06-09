@@ -565,6 +565,32 @@ export const eventsApi = {
     ),
 };
 
+export interface AnnouncementItem {
+  id: string;
+  entityType: string;
+  entityId: string;
+  title: string;
+  body: string;
+  sendAt: string;
+  isSent: boolean;
+  createdAt: string;
+}
+
+export const announcementsApi = {
+  getRecent2: (entityType: string, entityId: string) =>
+    authedFetch<AnnouncementItem[]>(
+      `/announcements/recent?entityType=${entityType}&entityId=${entityId}`,
+    ),
+
+  getList: (entityType: string, entityId: string) =>
+    authedFetch<AnnouncementItem[]>(
+      `/announcements?entityType=${entityType}&entityId=${entityId}`,
+    ),
+
+  getById: (id: string) =>
+    authedFetch<AnnouncementItem>(`/announcements/${id}`),
+};
+
 export const pushApi = {
   getVapidPublicKey: () =>
     authedFetch<{ publicKey: string }>("/push/vapid-public-key"),

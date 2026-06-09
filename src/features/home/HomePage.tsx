@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
-import { membersApi, departmentsApi, messagesApi, notificationsApi } from "@/lib/api";
+import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight } from "lucide-react";
+import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, type AnnouncementItem } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
 import SendMessageModal from "./SendMessageModal";
@@ -23,6 +23,7 @@ function HomePage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -71,6 +72,16 @@ function HomePage() {
         setBirthdays(birthdayMembers);
       } catch {
         setBirthdays([]);
+      }
+
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (departmentId) {
+          const items = await announcementsApi.getRecent2("DEPARTMENT", departmentId);
+          setAnnouncements(items);
+        }
+      } catch {
+        setAnnouncements([]);
       }
 
       setLoading(false);
@@ -139,15 +150,40 @@ function HomePage() {
         )}
       </section>
 
-      {/* <section>
-        <div className="mb-2 flex items-center gap-2">
-          <Megaphone className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">공지사항</h3>
+      <section>
+        <div className="mb-2 flex items-baseline justify-between">
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">공지사항</h3>
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => navigate("/announcements")}
+          >
+            더보기 <ChevronRight className="h-3 w-3" />
+          </button>
         </div>
-        <p className="py-4 text-center text-sm text-muted-foreground">
-          공지사항이 없습니다.
-        </p>
-      </section> */}
+        {announcements.length > 0 ? (
+          <div className="space-y-2">
+            {announcements.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="w-full rounded-lg bg-accent/50 px-3 py-2.5 text-left hover:bg-accent transition-colors"
+                onClick={() => navigate(`/announcements/${item.id}`)}
+              >
+                <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.body}</p>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="py-4 text-center text-sm text-muted-foreground">
+            공지사항이 없습니다.
+          </p>
+        )}
+      </section>
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
@@ -192,7 +228,7 @@ function HomePage() {
                 return 0;
               });
 
-              return sorted.map((person) => {
+              return sorted.slice(0, 3).map((person) => {
                 const dateLabel = person.bdDate
                   ? `${person.bdDate.getMonth() + 1}월 ${person.bdDate.getDate()}일(${DAYS[person.bdDate.getDay()]})`
                   : "";

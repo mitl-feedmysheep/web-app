@@ -26,6 +26,8 @@ import GroupManagePage from "@/features/group/GroupManagePage";
 import SermonNotesPage from "@/features/sermon-notes/SermonNotesPage";
 import CreateSermonNotePage from "@/features/sermon-notes/CreateSermonNotePage";
 import SermonNoteDetailPage from "@/features/sermon-notes/SermonNoteDetailPage";
+import AnnouncementsPage from "@/features/announcements/AnnouncementsPage";
+import AnnouncementDetailPage from "@/features/announcements/AnnouncementDetailPage";
 
 function isSplashEnabled(): boolean {
   const raw = String(import.meta.env.VITE_IS_SPLASH_ON ?? "true").toLowerCase();
@@ -85,6 +87,8 @@ function App() {
             <Route path="/my/department" element={<SelectDepartmentPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/announcements" element={<AnnouncementsPage />} />
+            <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
 
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
             <Route path="/groups/:groupId/manage" element={<GroupManagePage />} />
