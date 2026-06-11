@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight } from "lucide-react";
-import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, type AnnouncementItem } from "@/lib/api";
+import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight, BookMarked } from "lucide-react";
+import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, readingApi, type AnnouncementItem } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
 import SendMessageModal from "./SendMessageModal";
@@ -24,6 +24,8 @@ function HomePage() {
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [readingEnabled, setReadingEnabled] = useState(false);
+  const [todayReading, setTodayReading] = useState<{ readingRange: string; completed: boolean } | null>(null);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -82,6 +84,20 @@ function HomePage() {
         }
       } catch {
         setAnnouncements([]);
+      }
+
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (departmentId) {
+          const isEnabled = await readingApi.getStatus(departmentId);
+          setReadingEnabled(isEnabled);
+          if (isEnabled) {
+            const today = await readingApi.getToday(departmentId);
+            if (today) setTodayReading({ readingRange: today.readingRange, completed: today.completed });
+          }
+        }
+      } catch {
+        setReadingEnabled(false);
       }
 
       setLoading(false);
@@ -150,6 +166,49 @@ function HomePage() {
         )}
       </section>
 
+      {readingEnabled && (
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookMarked className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold">리딩지저스</h3>
+            </div>
+            <button
+              type="button"
+              className="flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => navigate("/reading/progress")}
+            >
+              내 진도 <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+          <button
+            type="button"
+            className="w-full rounded-xl border px-4 py-3.5 text-left hover:bg-accent/50 transition-colors"
+            onClick={() => navigate("/reading")}
+          >
+            {todayReading ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">오늘의 읽기 범위</p>
+                  <p className="text-sm font-semibold text-primary">{todayReading.readingRange}</p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    todayReading.completed
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {todayReading.completed ? "완독 ✓" : "읽기 시작"}
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">오늘의 분량을 확인하세요 →</p>
+            )}
+          </button>
+        </section>
+      )}
+
       <section>
         <div className="mb-2 flex items-baseline justify-between">
           <div className="flex items-center gap-2">
@@ -165,21 +224,21 @@ function HomePage() {
           </button>
         </div>
         {announcements.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {announcements.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className="w-full rounded-lg bg-accent/50 px-3 py-2.5 text-left hover:bg-accent transition-colors"
+                className="flex w-full items-center gap-2 rounded-md border border-primary/20 px-3 py-2 text-left hover:bg-accent/50 transition-colors"
                 onClick={() => navigate(`/announcements/${item.id}`)}
               >
-                <p className="text-sm font-medium line-clamp-1">{item.title}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.body}</p>
+                <span className="min-w-0 flex-1 truncate text-xs font-medium">{item.title}</span>
+                <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
               </button>
             ))}
           </div>
         ) : (
-          <p className="py-4 text-center text-sm text-muted-foreground">
+          <p className="py-1.5 text-center text-sm text-muted-foreground">
             공지사항이 없습니다.
           </p>
         )}
@@ -199,7 +258,7 @@ function HomePage() {
         </div>
 
         {birthdays.length > 0 ? (
-          <div className="max-h-[230px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[152px] space-y-2 overflow-y-auto pr-1">
             {(() => {
               const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
               const today = new Date();
@@ -228,7 +287,7 @@ function HomePage() {
                 return 0;
               });
 
-              return sorted.slice(0, 3).map((person) => {
+              return sorted.map((person) => {
                 const dateLabel = person.bdDate
                   ? `${person.bdDate.getMonth() + 1}월 ${person.bdDate.getDate()}일(${DAYS[person.bdDate.getDay()]})`
                   : "";

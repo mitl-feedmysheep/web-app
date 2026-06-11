@@ -101,10 +101,10 @@ function CreateSermonNotePage() {
       s.toLowerCase().includes(serviceType.toLowerCase()) && s !== serviceType
   );
 
-  const canSubmit = title.trim() && sermonDate && hasContent && !saving;
+  const canSubmit = title.trim() && sermonDate && !saving;
 
   const handleSubmit = async () => {
-    if (!canSubmit || !editorRef.current) return;
+    if (!canSubmit) return;
     setSaving(true);
 
     const payload = {
@@ -113,7 +113,7 @@ function CreateSermonNotePage() {
       preacher: preacher.trim() || undefined,
       serviceType: serviceType.trim() || undefined,
       scripture: scripture.trim() || undefined,
-      content: JSON.stringify(editorRef.current.getJSON()),
+      content: editorRef.current ? JSON.stringify(editorRef.current.getJSON()) : undefined,
     };
 
     try {
@@ -265,7 +265,7 @@ function CreateSermonNotePage() {
         {/* Content - tiptap editor */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-muted-foreground">
-            나의 노트 <span className="text-destructive">*</span>
+            나의 노트
           </label>
           <SermonNoteEditor
             initialContent={initialContent}

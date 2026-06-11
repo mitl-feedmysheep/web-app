@@ -28,6 +28,8 @@ import CreateSermonNotePage from "@/features/sermon-notes/CreateSermonNotePage";
 import SermonNoteDetailPage from "@/features/sermon-notes/SermonNoteDetailPage";
 import AnnouncementsPage from "@/features/announcements/AnnouncementsPage";
 import AnnouncementDetailPage from "@/features/announcements/AnnouncementDetailPage";
+import ReadingTodayPage from "@/features/reading/ReadingTodayPage";
+import ReadingProgressPage from "@/features/reading/ReadingProgressPage";
 
 function isSplashEnabled(): boolean {
   const raw = String(import.meta.env.VITE_IS_SPLASH_ON ?? "true").toLowerCase();
@@ -89,6 +91,8 @@ function App() {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />
             <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+            <Route path="/reading" element={<ReadingTodayPage />} />
+            <Route path="/reading/progress" element={<ReadingProgressPage />} />
 
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
             <Route path="/groups/:groupId/manage" element={<GroupManagePage />} />

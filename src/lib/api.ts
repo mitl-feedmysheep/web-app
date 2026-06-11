@@ -591,6 +591,26 @@ export const announcementsApi = {
     authedFetch<AnnouncementItem>(`/announcements/${id}`),
 };
 
+export const readingApi = {
+  getStatus: (departmentId: string) =>
+    authedFetch<boolean>(`/departments/${departmentId}/reading-plan/status`),
+
+  getToday: (departmentId: string) =>
+    authedFetch<TodayReading>(`/departments/${departmentId}/reading-plan/today`),
+
+  getAllDays: (departmentId: string) =>
+    authedFetch<ReadingPlanDaySummary[]>(`/departments/${departmentId}/reading-plan/days`),
+
+  getMyProgress: (departmentId: string) =>
+    authedFetch<MyReadingProgress>(`/departments/${departmentId}/reading-plan/me/progress`),
+
+  markComplete: (departmentId: string, dayId: string) =>
+    authedFetch<void>(`/departments/${departmentId}/reading-plan-days/${dayId}/completion`, { method: "POST" }),
+
+  unmarkComplete: (departmentId: string, dayId: string) =>
+    authedFetch<void>(`/departments/${departmentId}/reading-plan-days/${dayId}/completion`, { method: "DELETE" }),
+};
+
 export const pushApi = {
   getVapidPublicKey: () =>
     authedFetch<{ publicKey: string }>("/push/vapid-public-key"),

@@ -45,11 +45,10 @@ function AnnouncementDetailPage() {
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/40 bg-background/95 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
-          onClick={() => navigate("/announcements")}
+          onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          목록
         </button>
       </div>
 

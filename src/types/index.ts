@@ -265,3 +265,30 @@ export interface MemberSearchResult {
   mbti: string | null;
   description: string | null;
 }
+
+export interface TodayReading {
+  dayId: string;
+  readingDate: string;
+  dayNumber: number;
+  readingRange: string;
+  youtubeUrl: string | null;
+  description: string | null;
+  medias: Array<{ url: string; mediaType: string }>;
+  completed: boolean;
+}
+
+export interface ReadingPlanDaySummary {
+  dayId: string;
+  readingDate: string;
+  dayNumber: number;
+  readingRange: string;
+  youtubeUrl: string | null;
+}
+
+export interface MyReadingProgress {
+  completedCount: number;
+  totalDays: number;
+  progressPercent: number;
+  streak: number;
+  completedDates: string[];
+}

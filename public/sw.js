@@ -10,7 +10,7 @@ self.addEventListener("push", (e) => {
       icon: "/icon-192.png",
       badge: "/icon-192.png",
       data: { url: data.url || "/prayers" },
-      tag: "mitl-daily-prayer",
+      tag: data.url?.startsWith("/reading") ? "mitl-daily-reading" : "mitl-daily-prayer",
       renotify: true,
     })
   );

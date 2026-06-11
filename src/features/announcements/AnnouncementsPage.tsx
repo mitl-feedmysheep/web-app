@@ -66,8 +66,7 @@ function AnnouncementsPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium line-clamp-1">{item.title}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.body}</p>
-                  <p className="mt-1 text-[11px] text-muted-foreground/70">
+                  <p className="mt-0.5 text-[11px] text-muted-foreground/70">
                     {formatDate(item.sendAt)}
                   </p>
                 </div>
