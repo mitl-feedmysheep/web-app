@@ -1,9 +1,72 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, BookMarked, Youtube, ChevronLeft, ChevronRight, CheckCircle2, Circle, Headphones, Video } from "lucide-react";
+import { Loader2, BookMarked, Youtube, ChevronLeft, ChevronRight, CheckCircle2, Circle, Headphones, Video, ImageIcon, X, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { readingApi } from "@/lib/api";
 import type { TodayReading } from "@/types";
+
+function MediaImage({ url }: { url: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
+
+  return (
+    <>
+      <div className="relative flex items-center justify-center rounded-xl overflow-hidden bg-muted/40 min-h-[100px]">
+        {!loaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/50" />
+          </div>
+        )}
+        {error ? (
+          <div className="flex flex-col items-center gap-1.5 py-8 text-muted-foreground/40">
+            <ImageIcon className="h-8 w-8" />
+            <span className="text-xs">이미지를 불러올 수 없어요</span>
+          </div>
+        ) : (
+          <button type="button" onClick={() => loaded && setLightbox(true)} className="relative w-full">
+            <img
+              src={url}
+              alt="오늘의 요약"
+              crossOrigin="anonymous"
+              onLoad={() => setLoaded(true)}
+              onError={() => setError(true)}
+              className={`w-full max-h-[320px] rounded-xl object-contain transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+            />
+            {loaded && (
+              <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
+                <ZoomIn className="h-3 w-3" />
+                크게 보기
+              </span>
+            )}
+          </button>
+        )}
+      </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+          onClick={() => setLightbox(false)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 rounded-full bg-black/50 p-1.5 text-white"
+            onClick={() => setLightbox(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={url}
+            alt="오늘의 요약"
+            crossOrigin="anonymous"
+            className="max-h-[85dvh] max-w-full rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  );
+}
 
 export default function ReadingTodayPage() {
   const [reading, setReading] = useState<TodayReading | null>(null);
@@ -132,17 +195,9 @@ export default function ReadingTodayPage() {
       {/* 요약 사진 */}
       {reading.medias.length > 0 && (
         <div className="space-y-2">
-          {reading.medias
-            .filter((m) => m.mediaType === "MEDIUM" || m.mediaType === "THUMBNAIL")
-            .map((m, i) => (
-              <img
-                key={i}
-                src={m.url}
-                alt="오늘의 요약"
-                crossOrigin="anonymous"
-                className="w-full rounded-xl object-cover"
-              />
-            ))}
+          {reading.medias.map((m, i) => (
+            <MediaImage key={i} url={m.url} />
+          ))}
         </div>
       )}
 

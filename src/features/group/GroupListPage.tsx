@@ -79,7 +79,7 @@ function GroupListPage() {
               우리 교회 소모임 {allGroups.length}개
             </span>
           </div>
-          <div className="mt-2.5 max-h-[200px] overflow-y-auto space-y-1.5">
+          <div className="mt-2.5 max-h-[152px] overflow-y-auto space-y-1.5 pr-1">
             {allGroups.map((g) => (
               <div
                 key={g.groupId}
