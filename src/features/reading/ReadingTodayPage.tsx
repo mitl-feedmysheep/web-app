@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, BookMarked, Youtube, ChevronRight, CheckCircle2, Circle } from "lucide-react";
+import { Loader2, BookMarked, Youtube, ChevronLeft, ChevronRight, CheckCircle2, Circle, Headphones, Video } from "lucide-react";
 import { toast } from "sonner";
 import { readingApi } from "@/lib/api";
 import type { TodayReading } from "@/types";
@@ -62,18 +62,36 @@ export default function ReadingTodayPage() {
 
   if (!enabled) {
     return (
-      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-2 px-4 text-center">
-        <BookMarked className="h-10 w-10 text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">이 부서에서는 리딩지저스가 운영되지 않습니다.</p>
+      <div className="px-4 py-4">
+        <div className="mb-4 flex items-center gap-2">
+          <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <BookMarked className="h-5 w-5 text-primary" />
+          <h1 className="text-lg font-bold">리딩지저스</h1>
+        </div>
+        <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-2 text-center">
+          <BookMarked className="h-10 w-10 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">이 부서에서는 리딩지저스가 운영되지 않습니다.</p>
+        </div>
       </div>
     );
   }
 
   if (!reading) {
     return (
-      <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-2 px-4 text-center">
-        <BookMarked className="h-10 w-10 text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">오늘의 읽기 분량이 없습니다.</p>
+      <div className="px-4 py-4">
+        <div className="mb-4 flex items-center gap-2">
+          <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <BookMarked className="h-5 w-5 text-primary" />
+          <h1 className="text-lg font-bold">리딩지저스</h1>
+        </div>
+        <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-2 text-center">
+          <BookMarked className="h-10 w-10 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">오늘의 읽기 분량이 없습니다.</p>
+        </div>
       </div>
     );
   }
@@ -82,14 +100,11 @@ export default function ReadingTodayPage() {
     <div className="space-y-5 px-4 py-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <BookMarked className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold">리딩지저스</h1>
-          </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {reading.readingDate} · Day {reading.dayNumber}
-          </p>
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-bold">{reading.planTitle ?? "리딩플랜"}</h1>
         </div>
         <button
           type="button"
@@ -100,9 +115,17 @@ export default function ReadingTodayPage() {
         </button>
       </div>
 
+      {/* 요약 텍스트 */}
+      {reading.description && (
+        <div className="rounded-xl border px-3 py-2.5">
+          <p className="text-[11px] text-muted-foreground mb-1">요약</p>
+          <p className="text-xs leading-relaxed whitespace-pre-line">{reading.description}</p>
+        </div>
+      )}
+
       {/* 읽기 범위 */}
-      <div className="rounded-xl bg-primary/5 px-4 py-4">
-        <p className="text-xs text-muted-foreground mb-1">오늘 읽을 범위</p>
+      <div className="rounded-xl bg-primary/5 px-4 py-3">
+        <p className="text-xs text-muted-foreground mb-0.5">오늘 읽을 범위</p>
         <p className="text-base font-semibold text-primary">{reading.readingRange}</p>
       </div>
 
@@ -123,27 +146,42 @@ export default function ReadingTodayPage() {
         </div>
       )}
 
-      {/* 요약 텍스트 */}
-      {reading.description && (
-        <div className="rounded-xl border px-4 py-3">
-          <p className="text-xs text-muted-foreground mb-1.5">요약</p>
-          <p className="text-sm leading-relaxed whitespace-pre-line">{reading.description}</p>
-        </div>
-      )}
-
       {/* 유튜브 링크 */}
       {reading.youtubeUrl && (
         <a
           href={reading.youtubeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 hover:bg-red-100 transition-colors dark:border-red-900/30 dark:bg-red-950/20"
+          className="flex items-center gap-2.5 rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 hover:bg-red-100 transition-colors dark:border-red-900/30 dark:bg-red-950/20"
         >
-          <Youtube className="h-5 w-5 text-red-500 shrink-0" />
-          <div>
-            <p className="text-sm font-medium">유튜브로 듣기</p>
-            <p className="text-xs text-muted-foreground line-clamp-1">{reading.youtubeUrl}</p>
-          </div>
+          <Youtube className="h-4 w-4 text-red-500 shrink-0" />
+          <p className="text-sm font-medium">유튜브로 듣기</p>
+        </a>
+      )}
+
+      {/* 오디오 링크 */}
+      {reading.audioUrl && (
+        <a
+          href={reading.audioUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5 hover:bg-sky-100 transition-colors dark:border-sky-900/30 dark:bg-sky-950/20"
+        >
+          <Headphones className="h-4 w-4 text-sky-500 shrink-0" />
+          <p className="text-sm font-medium">오디오로 듣기</p>
+        </a>
+      )}
+
+      {/* 비디오 링크 */}
+      {reading.videoUrl && (
+        <a
+          href={reading.videoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 rounded-xl border border-violet-100 bg-violet-50 px-3 py-2.5 hover:bg-violet-100 transition-colors dark:border-violet-900/30 dark:bg-violet-950/20"
+        >
+          <Video className="h-4 w-4 text-violet-500 shrink-0" />
+          <p className="text-sm font-medium">영상으로 보기</p>
         </a>
       )}
 

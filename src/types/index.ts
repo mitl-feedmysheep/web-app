@@ -268,10 +268,12 @@ export interface MemberSearchResult {
 
 export interface TodayReading {
   dayId: string;
-  readingDate: string;
   dayNumber: number;
+  planTitle: string | null;
   readingRange: string;
   youtubeUrl: string | null;
+  audioUrl: string | null;
+  videoUrl: string | null;
   description: string | null;
   medias: Array<{ url: string; mediaType: string }>;
   completed: boolean;

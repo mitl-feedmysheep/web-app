@@ -25,7 +25,7 @@ function HomePage() {
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [readingEnabled, setReadingEnabled] = useState(false);
-  const [todayReading, setTodayReading] = useState<{ readingRange: string; completed: boolean } | null>(null);
+  const [readingUnread, setReadingUnread] = useState(false);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -93,7 +93,7 @@ function HomePage() {
           setReadingEnabled(isEnabled);
           if (isEnabled) {
             const today = await readingApi.getToday(departmentId);
-            if (today) setTodayReading({ readingRange: today.readingRange, completed: today.completed });
+            setReadingUnread(today != null && !today.completed);
           }
         }
       } catch {
@@ -122,6 +122,18 @@ function HomePage() {
             {user?.name ?? "사용자"}님, 반가워요! 👋
           </h2>
           <div className="flex items-center gap-1">
+            {readingEnabled && (
+              <button
+                type="button"
+                className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
+                onClick={() => navigate("/reading")}
+              >
+                <BookMarked className="h-5 w-5" />
+                {readingUnread && (
+                  <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500" />
+                )}
+              </button>
+            )}
             <button
               type="button"
               className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
@@ -165,49 +177,6 @@ function HomePage() {
           </p>
         )}
       </section>
-
-      {readingEnabled && (
-        <section>
-          <div className="mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BookMarked className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold">리딩지저스</h3>
-            </div>
-            <button
-              type="button"
-              className="flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => navigate("/reading/progress")}
-            >
-              내 진도 <ChevronRight className="h-3 w-3" />
-            </button>
-          </div>
-          <button
-            type="button"
-            className="w-full rounded-xl border px-4 py-3.5 text-left hover:bg-accent/50 transition-colors"
-            onClick={() => navigate("/reading")}
-          >
-            {todayReading ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">오늘의 읽기 범위</p>
-                  <p className="text-sm font-semibold text-primary">{todayReading.readingRange}</p>
-                </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    todayReading.completed
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {todayReading.completed ? "완독 ✓" : "읽기 시작"}
-                </span>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">오늘의 분량을 확인하세요 →</p>
-            )}
-          </button>
-        </section>
-      )}
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
