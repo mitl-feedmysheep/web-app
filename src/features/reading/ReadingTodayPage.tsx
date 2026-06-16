@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, BookMarked, Youtube, ChevronLeft, ChevronRight, CheckCircle2, Circle, Headphones, Video, ImageIcon, X, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { readingApi } from "@/lib/api";
@@ -73,7 +73,10 @@ export default function ReadingTodayPage() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [enabled, setEnabled] = useState(true);
+  const [todayCount, setTodayCount] = useState<number | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dateParam = searchParams.get("date");
 
   const departmentId = localStorage.getItem("departmentId") ?? "";
 
@@ -83,14 +86,20 @@ export default function ReadingTodayPage() {
       const isEnabled = await readingApi.getStatus(departmentId);
       setEnabled(isEnabled);
       if (!isEnabled) { setLoading(false); return; }
-      const data = await readingApi.getToday(departmentId);
+      const [data, count] = await Promise.all([
+        dateParam
+          ? readingApi.getByDate(departmentId, dateParam)
+          : readingApi.getToday(departmentId),
+        !dateParam ? readingApi.getTodayCount(departmentId) : Promise.resolve(null),
+      ]);
       setReading(data);
+      setTodayCount(count);
     } catch {
       setReading(null);
     } finally {
       setLoading(false);
     }
-  }, [departmentId]);
+  }, [departmentId, dateParam]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -103,9 +112,11 @@ export default function ReadingTodayPage() {
       if (newCompleted) {
         await readingApi.markComplete(departmentId, reading.dayId);
         toast.success("완독 완료! 🎉");
+        setTodayCount((c) => (c ?? 0) + 1);
       } else {
         await readingApi.unmarkComplete(departmentId, reading.dayId);
         toast.success("완독이 취소됐습니다.");
+        setTodayCount((c) => Math.max((c ?? 1) - 1, 0));
       }
     } catch {
       setReading((prev) => prev ? { ...prev, completed: !newCompleted } : prev);
@@ -144,12 +155,21 @@ export default function ReadingTodayPage() {
   if (!reading) {
     return (
       <div className="px-4 py-4">
-        <div className="mb-4 flex items-center gap-2">
-          <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-5 w-5" />
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <BookMarked className="h-5 w-5 text-primary" />
+            <h1 className="text-lg font-bold">리딩지저스</h1>
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => navigate("/reading/progress")}
+          >
+            📊 내 진도 <ChevronRight className="h-3.5 w-3.5" />
           </button>
-          <BookMarked className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-bold">리딩지저스</h1>
         </div>
         <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-2 text-center">
           <BookMarked className="h-10 w-10 text-muted-foreground/40" />
@@ -164,18 +184,31 @@ export default function ReadingTodayPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => navigate("/")} className="p-1 -ml-1 text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={() => navigate(dateParam ? "/reading/progress" : "/")}
+            className="p-1 -ml-1 text-muted-foreground hover:text-foreground"
+          >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-bold">{reading.planTitle ?? "리딩플랜"}</h1>
+          <div>
+            <h1 className="text-lg font-bold leading-tight">{reading.planTitle ?? "리딩플랜"}</h1>
+            {dateParam && (
+              <p className="text-xs text-muted-foreground leading-tight">
+                {dateParam.replace(/-/g, ".")}
+              </p>
+            )}
+          </div>
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => navigate("/reading/progress")}
-        >
-          내 진도 <ChevronRight className="h-3.5 w-3.5" />
-        </button>
+        {!dateParam && (
+          <button
+            type="button"
+            className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => navigate("/reading/progress")}
+          >
+            📊 내 진도 <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* 요약 텍스트 */}
@@ -238,6 +271,15 @@ export default function ReadingTodayPage() {
           <Video className="h-4 w-4 text-violet-500 shrink-0" />
           <p className="text-sm font-medium">영상으로 보기</p>
         </a>
+      )}
+
+      {/* 오늘 부서 완독 현황 (날짜 지정 뷰에서는 숨김) */}
+      {!dateParam && todayCount !== null && (
+        <div className="flex items-center justify-center gap-1.5 rounded-xl bg-orange-50 py-2.5 text-sm font-medium text-orange-600 dark:bg-orange-950/20 dark:text-orange-400">
+          {todayCount === 0
+            ? "오늘 첫 번째 완독자가 되어보세요! 🔥"
+            : `오늘 벌써 ${todayCount}명 완독 완료 🔥`}
+        </div>
       )}
 
       {/* 완독 버튼 */}

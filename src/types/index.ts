@@ -293,4 +293,5 @@ export interface MyReadingProgress {
   progressPercent: number;
   streak: number;
   completedDates: string[];
+  scheduledDates: string[];
 }

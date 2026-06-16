@@ -598,11 +598,17 @@ export const readingApi = {
   getToday: (departmentId: string) =>
     authedFetch<TodayReading>(`/departments/${departmentId}/reading-plan/today`),
 
+  getByDate: (departmentId: string, date: string) =>
+    authedFetch<TodayReading>(`/departments/${departmentId}/reading-plan/by-date?date=${date}`),
+
   getAllDays: (departmentId: string) =>
     authedFetch<ReadingPlanDaySummary[]>(`/departments/${departmentId}/reading-plan/days`),
 
   getMyProgress: (departmentId: string) =>
     authedFetch<MyReadingProgress>(`/departments/${departmentId}/reading-plan/me/progress`),
+
+  getTodayCount: (departmentId: string) =>
+    authedFetch<number>(`/departments/${departmentId}/reading-plan/today/count`),
 
   markComplete: (departmentId: string, dayId: string) =>
     authedFetch<void>(`/departments/${departmentId}/reading-plan-days/${dayId}/completion`, { method: "POST" }),
