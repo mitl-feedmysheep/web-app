@@ -9,6 +9,7 @@ import {
   KeyRound,
   Church,
   Building2,
+  Bell,
   ChevronRight,
   LogOut,
   Loader2,
@@ -19,7 +20,6 @@ import { unsubscribe as pushUnsubscribe } from "@/lib/push";
 import type { User } from "@/types";
 import OnboardingModal from "@/features/onboarding/OnboardingModal";
 import { useOnboarding } from "@/features/onboarding/useOnboarding";
-import { NotificationToggleRow } from "./components/NotificationToggleRow";
 
 const MENU_ITEMS = [
   { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
@@ -112,7 +112,14 @@ function MyPage() {
 
       <Card className="border-0 shadow-md shadow-primary/5">
         <CardContent className="p-0">
-          <NotificationToggleRow />
+          <button
+            onClick={() => navigate("/my/notifications")}
+            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
+          >
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="flex-1 text-left text-sm font-medium">알림 설정</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
         </CardContent>
       </Card>
 

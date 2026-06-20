@@ -227,7 +227,7 @@ function HomePage() {
         </div>
 
         {birthdays.length > 0 ? (
-          <div className="max-h-[152px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[125px] space-y-1 overflow-y-auto pr-1">
             {(() => {
               const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
               const today = new Date();
@@ -271,11 +271,11 @@ function HomePage() {
                 return (
                   <div
                     key={person.memberId}
-                    className="flex items-center gap-2.5 rounded-lg bg-accent/50 px-3 py-2.5"
+                    className="flex items-center gap-2 rounded-md bg-accent/50 px-3 py-2"
                   >
                     {person.sex && (
                       <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                           person.sex === "M"
                             ? "bg-blue-100 text-blue-600"
                             : "bg-pink-100 text-pink-600"
@@ -284,11 +284,11 @@ function HomePage() {
                         {person.sex === "M" ? "남" : "여"}
                       </span>
                     )}
-                    <span className="text-sm font-medium">{person.name}</span>
-                    <span className="text-xs text-muted-foreground">{dateLabel}</span>
+                    <span className="text-xs font-medium">{person.name}</span>
+                    <span className="text-[11px] text-muted-foreground">{dateLabel}</span>
                     {dDayLabel && (
                       <span
-                        className={`ml-auto shrink-0 text-xs font-semibold ${
+                        className={`ml-auto shrink-0 text-[11px] font-semibold ${
                           person.dDay === 0 ? "text-red-500" : "text-primary/70"
                         }`}
                       >
@@ -308,7 +308,7 @@ function HomePage() {
                           }`}
                           onClick={() => !isSelf && setMessageTarget({ id: person.memberId, name: person.name })}
                         >
-                          <MessageSquareHeart className="h-4 w-4" />
+                          <MessageSquareHeart className="h-3.5 w-3.5" />
                         </button>
                       );
                     })()}

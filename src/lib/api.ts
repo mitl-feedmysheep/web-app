@@ -632,4 +632,13 @@ export const pushApi = {
       method: "DELETE",
       body: JSON.stringify(body),
     }),
+
+  getTopics: () =>
+    authedFetch<string[]>("/push/topics"),
+
+  subscribeTopic: (topic: string) =>
+    authedFetch<void>(`/push/topics/${topic}`, { method: "POST" }),
+
+  unsubscribeTopic: (topic: string) =>
+    authedFetch<void>(`/push/topics/${topic}`, { method: "DELETE" }),
 };

@@ -6,7 +6,6 @@ import GatheringSlide from "./slides/GatheringSlide";
 import PrayerSlide from "./slides/PrayerSlide";
 import SermonNotesSlide from "./slides/SermonNotesSlide";
 import MySlide from "./slides/MySlide";
-import NotificationSlide from "./slides/NotificationSlide";
 import OutroSlide from "./slides/OutroSlide";
 
 export interface FloatingBadge {
@@ -23,13 +22,15 @@ export interface OnboardingSlideData {
   MockComponent: ComponentType;
   hasHighlight: boolean;
   tooltipPosition?: "top" | "bottom";
+  tooltipArrow?: "left" | "right";
   tooltipText?: string;
   activeTab?: "/" | "/groups" | "/prayers" | "/sermon-notes" | "/my";
   activeTabLabel?: string;
-  // 오버레이 위에 띄울 부가 설명 배지
-  floatingBadge?: FloatingBadge;
+  // 오버레이 위에 띄울 부가 설명 배지 (여러 개 가능)
+  floatingBadges?: FloatingBadge[];
 }
 
+const HomeHeaderSlide = () => HomeSlide({ section: "header" });
 const HomeSummarySlide = () => HomeSlide({ section: "summary" });
 const HomeAnnouncementSlide = () => HomeSlide({ section: "announcement" });
 const HomeBirthdaySlide = () => HomeSlide({ section: "birthday" });
@@ -41,6 +42,16 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     hasHighlight: false,
   },
   {
+    id: "home-header",
+    MockComponent: HomeHeaderSlide,
+    hasHighlight: true,
+    tooltipPosition: "bottom",
+    tooltipArrow: "right",
+    tooltipText: "📖 성경 읽기 플랜, 교적부 검색, 알림, 메시지 기능을 이용할 수 있어요.",
+    activeTab: "/",
+    activeTabLabel: "홈",
+  },
+  {
     id: "home-summary",
     MockComponent: HomeSummarySlide,
     hasHighlight: true,
@@ -48,7 +59,6 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     tooltipText: "📋 홈에서는 이번 주 소그룹에서 나눈 나의 한 주 목표와 기도제목을 확인할 수 있어요",
     activeTab: "/",
     activeTabLabel: "홈",
-    floatingBadge: { label: "교적부 기능도 사용할 수 있어요", top: "58px", right: "16px", callout: true, calloutDirection: "up-right" },
   },
   {
     id: "home-announcement",
@@ -109,16 +119,7 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     MockComponent: MySlide,
     hasHighlight: true,
     tooltipPosition: "bottom",
-    tooltipText: "⚙️ 내 정보 수정, 비밀번호 변경, 교회/부서 전환을 할 수 있어요",
-    activeTab: "/my",
-    activeTabLabel: "MY",
-  },
-  {
-    id: "notification",
-    MockComponent: NotificationSlide,
-    hasHighlight: true,
-    tooltipPosition: "bottom",
-    tooltipText: "🔔 MY 탭에서 알림을 켜면 매일 오전 9시에 이번 주 기도제목을 받아볼 수 있어요",
+    tooltipText: "⚙️ 내 정보 수정, 교회/부서 전환, 알림 설정까지 MY 탭에서 모두 관리할 수 있어요",
     activeTab: "/my",
     activeTabLabel: "MY",
   },

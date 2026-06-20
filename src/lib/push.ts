@@ -25,18 +25,26 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export async function subscribe(): Promise<boolean> {
-  if (!isSupported()) return false;
+  if (!isSupported()) throw new Error("[push] not supported");
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return false;
 
-  const registration = await navigator.serviceWorker.ready;
-  const { publicKey } = await pushApi.getVapidPublicKey();
+  const registration = await navigator.serviceWorker.ready.catch((e) => {
+    throw new Error("[push] serviceWorker.ready failed: " + e);
+  });
+
+  const { publicKey } = await pushApi.getVapidPublicKey().catch((e) => {
+    throw new Error("[push] getVapidPublicKey failed: " + e);
+  });
+
   const applicationServerKey = urlBase64ToUint8Array(publicKey);
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey,
+  }).catch((e) => {
+    throw new Error("[push] pushManager.subscribe failed: " + e);
   });
 
   const keys = subscription.toJSON().keys ?? {};
@@ -48,6 +56,8 @@ export async function subscribe(): Promise<boolean> {
     auth: keys.auth ?? "",
     userAgent: navigator.userAgent,
     timezone,
+  }).catch((e) => {
+    throw new Error("[push] backend subscribe failed: " + e);
   });
 
   return true;

@@ -26,8 +26,8 @@ export function NotificationPromptSheet({ open, onClose }: Props) {
       if (!success) {
         toast.error("알림 권한이 거부되었습니다. MY 탭에서 다시 설정할 수 있어요.");
       }
-    } catch {
-      toast.error("알림 설정 중 오류가 발생했습니다.");
+    } catch (e) {
+      toast.error("알림 설정 중 오류가 발생했습니다: " + String(e));
     } finally {
       setLoading(false);
       onClose();

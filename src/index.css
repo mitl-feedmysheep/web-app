@@ -39,7 +39,11 @@
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
+/* 다크모드 미지원 - 항상 라이트모드 */
+@variant dark (&:is(.dark *));
+
 :root {
+  color-scheme: light;
   --radius: 0.75rem;
   --background: oklch(0.99 0.002 120);
   --foreground: oklch(0.145 0 0);

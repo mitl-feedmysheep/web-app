@@ -1,9 +1,9 @@
-import { BookUser, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart, Megaphone, ChevronRight } from "lucide-react";
+import { BookUser, BookMarked, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart, Megaphone, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MockBottomNav from "../MockBottomNav";
 
 interface HomeSlideProps {
-  section: "summary" | "announcement" | "birthday";
+  section: "header" | "summary" | "announcement" | "birthday";
 }
 
 function HomeSlide({ section }: HomeSlideProps) {
@@ -16,16 +16,26 @@ function HomeSlide({ section }: HomeSlideProps) {
           <section {...(section === "summary" ? { "data-highlight": "" } : {})}>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">김창수님, 반가워요! 👋</h2>
-              <div className="flex items-center gap-1">
+              <div
+                className={`flex items-center gap-1${section === "header" ? " pt-0.5 pr-0.5" : ""}`}
+                {...(section === "header" ? { "data-highlight": "" } : {})}
+              >
+                <button type="button" className="shrink-0 p-1.5 text-primary/70" data-reading-target="">
+                  <div className="relative inline-flex">
+                    <BookMarked className="h-5 w-5" />
+                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" style={{ zIndex: 120 }} />
+                  </div>
+                </button>
                 <button type="button" className="relative shrink-0 p-1.5 text-primary/70" data-callout-target="">
                   <BookUser className="h-5 w-5" />
                 </button>
                 <button type="button" className="relative shrink-0 p-1.5 text-primary/70">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">3</span>
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white" style={{ zIndex: 120 }}>3</span>
                 </button>
                 <button type="button" className="relative shrink-0 p-1.5 text-primary/70">
                   <Mail className="h-5 w-5" />
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white" style={{ zIndex: 120 }}>1</span>
                 </button>
               </div>
             </div>
@@ -80,14 +90,11 @@ function HomeSlide({ section }: HomeSlideProps) {
                 더보기 <ChevronRight className="h-3 w-3" />
               </span>
             </div>
-            <div className="space-y-2">
-              {[
-                { title: "4월 수련회 안내", body: "오는 4월 12-13일 청평 수련회가 있습니다. 참가 신청은 3월 31일까지!" },
-                { title: "주일 예배 장소 변경", body: "4월 첫째 주 주일 예배는 본관 2층 대강당에서 진행됩니다." },
-              ].map((item) => (
-                <div key={item.title} className="w-full rounded-lg bg-accent/50 px-3 py-2.5">
-                  <p className="text-sm font-medium line-clamp-1">{item.title}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{item.body}</p>
+            <div className="space-y-1">
+              {["4월 수련회 안내", "주일 예배 장소 변경"].map((title) => (
+                <div key={title} className="flex w-full items-center gap-2 rounded-md border border-primary/20 px-3 py-2">
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium">{title}</span>
+                  <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
                 </div>
               ))}
             </div>
@@ -104,22 +111,22 @@ function HomeSlide({ section }: HomeSlideProps) {
                 아래의 <MessageSquareHeart className="inline h-3 w-3 text-pink-400" />을 눌러 축하해주세요!
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {[
                 { name: "박서준", date: "3월 27일(목)", dday: "🎂 TODAY", sex: "M" },
                 { name: "이지현", date: "3월 31일(월)", dday: "D-4", sex: "F" },
               ].map((m) => (
-                <div key={m.name} className="flex items-center gap-2.5 rounded-lg bg-accent/50 px-3 py-2.5">
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${m.sex === "M" ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"}`}>
+                <div key={m.name} className="flex items-center gap-2 rounded-md bg-accent/50 px-3 py-2">
+                  <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${m.sex === "M" ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"}`}>
                     {m.sex === "M" ? "남" : "여"}
                   </span>
-                  <span className="text-sm font-medium">{m.name}</span>
-                  <span className="text-xs text-muted-foreground">{m.date}</span>
-                  <span className={`ml-auto shrink-0 text-xs font-semibold ${m.dday.includes("TODAY") ? "text-red-500" : "text-primary/70"}`}>
+                  <span className="text-xs font-medium">{m.name}</span>
+                  <span className="text-[11px] text-muted-foreground">{m.date}</span>
+                  <span className={`ml-auto shrink-0 text-[11px] font-semibold ${m.dday.includes("TODAY") ? "text-red-500" : "text-primary/70"}`}>
                     {m.dday}
                   </span>
                   <button type="button" className="shrink-0 text-pink-400">
-                    <MessageSquareHeart className="h-4 w-4" />
+                    <MessageSquareHeart className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ))}

@@ -13,7 +13,7 @@ React 19 / Vite 7 / TypeScript 5.9
 - 폼: react-hook-form + zod
 - 스타일: Tailwind CSS 4
 - 토스트: sonner
-- 테마: next-themes (다크모드)
+- 테마: next-themes (설치되어 있으나 **다크모드 미지원** — 항상 라이트모드 고정)
 - 아이콘: lucide-react
 
 ## 디렉토리 구조

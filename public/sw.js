@@ -6,11 +6,11 @@ self.addEventListener("push", (e) => {
   const data = e.data.json();
   e.waitUntil(
     self.registration.showNotification(data.title || "IntoTheHeaven", {
-      body: data.body || "",
+      ...(data.body && { body: data.body }),
       icon: "/icon-192.png",
       badge: "/icon-192.png",
       data: { url: data.url || "/prayers" },
-      tag: data.url?.startsWith("/reading") ? "mitl-daily-reading" : "mitl-daily-prayer",
+      tag: data.url?.startsWith("/reading") ? "mitl-daily-reading" : data.url === "/" ? "mitl-daily-prayer" : "mitl-notification",
       renotify: true,
     })
   );

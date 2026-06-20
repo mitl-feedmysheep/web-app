@@ -3,6 +3,7 @@ import {
   KeyRound,
   Church,
   Building2,
+  Bell,
   ChevronRight,
   CircleHelp,
   LogOut,
@@ -53,6 +54,19 @@ function MySlide() {
                     {index < MENU_ITEMS.length - 1 && <Separator className="mx-4" />}
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md shadow-primary/5">
+              <CardContent className="p-0">
+                <div className="flex w-full items-center gap-3 px-4 py-3.5">
+                  <Bell className="h-5 w-5 shrink-0 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">알림 설정</p>
+                    <p className="text-xs text-muted-foreground">공지사항과 기도제목을 알림으로 받을 수 있어요.</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </div>
               </CardContent>
             </Card>
 

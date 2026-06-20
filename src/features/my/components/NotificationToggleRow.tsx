@@ -9,10 +9,13 @@ import {
   subscribe,
   unsubscribe,
 } from "@/lib/push";
+import { pushApi } from "@/lib/api";
 
 export function NotificationToggleRow() {
-  const [enabled, setEnabled] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [prayerEnabled, setPrayerEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [prayerLoading, setPrayerLoading] = useState(false);
 
   useEffect(() => {
     if (!isSupported()) {
@@ -20,61 +23,91 @@ export function NotificationToggleRow() {
       return;
     }
     const permission = getPermission();
-    if (permission === "granted") {
-      getSubscription().then((sub) => {
-        setEnabled(sub !== null);
-        setLoading(false);
-      });
-    } else {
-      setEnabled(false);
+    if (permission !== "granted") {
       setLoading(false);
+      return;
     }
+    Promise.all([getSubscription(), pushApi.getTopics()])
+      .then(([sub, topics]) => {
+        setSubscribed(sub !== null);
+        setPrayerEnabled(topics.includes("PRAYER"));
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleToggle = async (checked: boolean) => {
+  const handleSubscribeToggle = async (checked: boolean) => {
     if (!isSupported()) return;
-
-    const permission = getPermission();
-
-    if (permission === "denied") {
+    if (getPermission() === "denied") {
       toast.error("브라우저 설정에서 알림을 허용해주세요.");
       return;
     }
-
     setLoading(true);
     try {
       if (checked) {
         const success = await subscribe();
-        setEnabled(success);
-        if (!success) {
-          toast.error("알림 권한이 거부되었습니다.");
-        }
+        setSubscribed(success);
+        if (!success) toast.error("알림 권한이 거부되었습니다.");
       } else {
         await unsubscribe();
-        setEnabled(false);
+        setSubscribed(false);
+        setPrayerEnabled(false);
       }
-    } catch {
-      toast.error("알림 설정 중 오류가 발생했습니다.");
+    } catch (e) {
+      toast.error("알림 설정 중 오류가 발생했습니다: " + String(e));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrayerToggle = async (checked: boolean) => {
+    setPrayerLoading(true);
+    try {
+      if (checked) {
+        await pushApi.subscribeTopic("PRAYER");
+        setPrayerEnabled(true);
+      } else {
+        await pushApi.unsubscribeTopic("PRAYER");
+        setPrayerEnabled(false);
+      }
+    } catch {
+      toast.error("기도제목 알림 설정 중 오류가 발생했습니다.");
+    } finally {
+      setPrayerLoading(false);
     }
   };
 
   if (!isSupported()) return null;
 
   return (
-    <div className="flex w-full items-center gap-3 px-4 py-3.5">
-      <Bell className="h-5 w-5 text-muted-foreground" />
-      <div className="flex-1">
-        <span className="text-sm font-medium">알림 받기</span>
-        <p className="text-xs text-muted-foreground">매일 오전 9시, 이번 주 기도제목을 알려드려요.</p>
+    <div className="flex flex-col">
+      <div className="flex w-full items-center gap-3 px-4 py-3.5">
+        <Bell className="h-5 w-5 text-muted-foreground" />
+        <div className="flex-1">
+          <span className="text-sm font-medium">알림 동의</span>
+          <p className="text-xs text-muted-foreground">목사님·운영진 공지 알림을 받아볼 수 있어요.</p>
+        </div>
+        <Switch
+          checked={subscribed}
+          onCheckedChange={handleSubscribeToggle}
+          disabled={loading}
+          aria-label="알림 동의"
+        />
       </div>
-      <Switch
-        checked={enabled}
-        onCheckedChange={handleToggle}
-        disabled={loading}
-        aria-label="알림 받기"
-      />
+
+      {subscribed && (
+        <div className="flex w-full items-center gap-3 px-4 py-3.5 pl-12">
+          <div className="flex-1">
+            <span className="text-sm font-medium">기도제목 매일 알림</span>
+            <p className="text-xs text-muted-foreground">매일 오전 9시, 이번 주 나의 기도제목을 알려드려요.</p>
+          </div>
+          <Switch
+            checked={prayerEnabled}
+            onCheckedChange={handlePrayerToggle}
+            disabled={prayerLoading}
+            aria-label="기도제목 매일 알림"
+          />
+        </div>
+      )}
     </div>
   );
 }
