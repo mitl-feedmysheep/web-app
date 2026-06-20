@@ -176,7 +176,7 @@ function NotificationSettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={readingEnabled}
+                  checked={readingEnabled && readingAvailable}
                   onCheckedChange={handleReadingToggle}
                   disabled={readingLoading || !subscribed || !readingAvailable}
                   aria-label="리딩지저스 매일 알림"
