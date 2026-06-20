@@ -15,9 +15,12 @@ import type {
   LoginRequest,
   LoginResponse,
   MemberSearchResult,
+  MyReadingProgress,
+  ReadingPlanDaySummary,
   SermonNote,
   SignupRequest,
   SignupResponse,
+  TodayReading,
   UpdateSermonNoteRequest,
   User,
 } from "@/types";

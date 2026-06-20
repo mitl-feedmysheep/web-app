@@ -205,7 +205,7 @@ export interface CreateSermonNoteRequest {
   preacher?: string;
   serviceType?: string;
   scripture?: string;
-  content: string;
+  content?: string;
 }
 
 export interface UpdateSermonNoteRequest {
@@ -214,7 +214,7 @@ export interface UpdateSermonNoteRequest {
   preacher?: string;
   serviceType?: string;
   scripture?: string;
-  content: string;
+  content?: string;
 }
 
 export interface HomeSummaryGoal {

@@ -38,7 +38,7 @@ export async function subscribe(): Promise<boolean> {
     throw new Error("[push] getVapidPublicKey failed: " + e);
   });
 
-  const applicationServerKey = urlBase64ToUint8Array(publicKey);
+  const applicationServerKey = urlBase64ToUint8Array(publicKey).buffer as ArrayBuffer;
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,

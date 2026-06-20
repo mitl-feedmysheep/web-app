@@ -24,7 +24,6 @@ function CreateSermonNotePage() {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
-  const [hasContent, setHasContent] = useState(false);
 
   const editorRef = useRef<Editor | null>(null);
   const [initialContent, setInitialContent] = useState<
@@ -33,10 +32,6 @@ function CreateSermonNotePage() {
 
   const handleEditorRef = useCallback((editor: Editor | null) => {
     editorRef.current = editor;
-  }, []);
-
-  const handleEditorChange = useCallback((isEmpty: boolean) => {
-    setHasContent(!isEmpty);
   }, []);
 
   const [serviceTypeSuggestions, setServiceTypeSuggestions] = useState<
@@ -64,7 +59,6 @@ function CreateSermonNotePage() {
         setScripture(note.scripture ?? "");
         try {
           setInitialContent(JSON.parse(note.content));
-          setHasContent(true);
         } catch {
           // 레거시 plain text — 에디터에 로드 불가
           setInitialContent(undefined);
@@ -269,7 +263,6 @@ function CreateSermonNotePage() {
           </label>
           <SermonNoteEditor
             initialContent={initialContent}
-            onChange={handleEditorChange}
             editorRef={handleEditorRef}
           />
         </div>
