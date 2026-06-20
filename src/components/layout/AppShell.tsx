@@ -40,6 +40,10 @@ function AppShell() {
     setShowNotificationPrompt(false);
   };
 
+  const handleNotificationPromptSuccess = () => {
+    navigate("/my/notifications");
+  };
+
   const showBottomNav = MAIN_TABS.includes(pathname);
 
   return (
@@ -52,6 +56,7 @@ function AppShell() {
       <NotificationPromptSheet
         open={showNotificationPrompt}
         onClose={handleNotificationPromptClose}
+        onSuccess={handleNotificationPromptSuccess}
       />
     </div>
   );

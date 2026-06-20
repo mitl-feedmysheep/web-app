@@ -14,16 +14,19 @@ import { toast } from "sonner";
 interface Props {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function NotificationPromptSheet({ open, onClose }: Props) {
+export function NotificationPromptSheet({ open, onClose, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleAllow = async () => {
     setLoading(true);
     try {
       const success = await subscribe();
-      if (!success) {
+      if (success) {
+        onSuccess?.();
+      } else {
         toast.error("알림 권한이 거부되었습니다. MY 탭에서 다시 설정할 수 있어요.");
       }
     } catch (e) {
@@ -41,10 +44,11 @@ export function NotificationPromptSheet({ open, onClose }: Props) {
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-2">
             <Bell className="h-7 w-7 text-primary" />
           </div>
-          <SheetTitle className="text-center text-lg">매일 기도제목 알림</SheetTitle>
+          <SheetTitle className="text-center text-lg">알림 설정</SheetTitle>
           <SheetDescription className="text-center leading-relaxed">
-            매일 오전 9시, 이번 주 기도제목을 알려드려요.{"\n"}
-            알림을 허용하면 잊지 않고 복기할 수 있어요.
+            각종 공지사항과 관련된 알림을 받을 수 있어요.{"\n"}
+            추가적으로 기도제목 알림, 성경읽기 알림 등도{"\n"}
+            직접 선택할 수 있어요.
           </SheetDescription>
         </SheetHeader>
 

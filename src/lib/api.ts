@@ -577,17 +577,18 @@ export interface AnnouncementItem {
   sendAt: string;
   isSent: boolean;
   createdAt: string;
+  images?: string[];
 }
 
 export const announcementsApi = {
-  getRecent2: (entityType: string, entityId: string) =>
+  getRecent2: (entityType: string, entityId: string, type = "ANNOUNCEMENT") =>
     authedFetch<AnnouncementItem[]>(
-      `/announcements/recent?entityType=${entityType}&entityId=${entityId}`,
+      `/announcements/recent?entityType=${entityType}&entityId=${entityId}&type=${type}`,
     ),
 
-  getList: (entityType: string, entityId: string) =>
+  getList: (entityType: string, entityId: string, type = "ANNOUNCEMENT") =>
     authedFetch<AnnouncementItem[]>(
-      `/announcements?entityType=${entityType}&entityId=${entityId}`,
+      `/announcements?entityType=${entityType}&entityId=${entityId}&type=${type}`,
     ),
 
   getById: (id: string) =>
