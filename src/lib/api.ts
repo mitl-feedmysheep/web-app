@@ -564,3 +564,81 @@ export const eventsApi = {
       `/events?entityId=${entityId}&entityType=${entityType}&year=${year}&month=${month}`,
     ),
 };
+
+export interface AnnouncementItem {
+  id: string;
+  entityType: string;
+  entityId: string;
+  title: string;
+  body: string;
+  sendAt: string;
+  isSent: boolean;
+  createdAt: string;
+}
+
+export const announcementsApi = {
+  getRecent2: (entityType: string, entityId: string) =>
+    authedFetch<AnnouncementItem[]>(
+      `/announcements/recent?entityType=${entityType}&entityId=${entityId}`,
+    ),
+
+  getList: (entityType: string, entityId: string) =>
+    authedFetch<AnnouncementItem[]>(
+      `/announcements?entityType=${entityType}&entityId=${entityId}`,
+    ),
+
+  getById: (id: string) =>
+    authedFetch<AnnouncementItem>(`/announcements/${id}`),
+};
+
+export const readingApi = {
+  getStatus: (departmentId: string) =>
+    authedFetch<boolean>(`/departments/${departmentId}/reading-plan/status`),
+
+  getToday: (departmentId: string) =>
+    authedFetch<TodayReading>(`/departments/${departmentId}/reading-plan/today`),
+
+  getByDate: (departmentId: string, date: string) =>
+    authedFetch<TodayReading>(`/departments/${departmentId}/reading-plan/by-date?date=${date}`),
+
+  getAllDays: (departmentId: string) =>
+    authedFetch<ReadingPlanDaySummary[]>(`/departments/${departmentId}/reading-plan/days`),
+
+  getMyProgress: (departmentId: string) =>
+    authedFetch<MyReadingProgress>(`/departments/${departmentId}/reading-plan/me/progress`),
+
+  getTodayCount: (departmentId: string) =>
+    authedFetch<number>(`/departments/${departmentId}/reading-plan/today/count`),
+
+  markComplete: (departmentId: string, dayId: string) =>
+    authedFetch<void>(`/departments/${departmentId}/reading-plan-days/${dayId}/completion`, { method: "POST" }),
+
+  unmarkComplete: (departmentId: string, dayId: string) =>
+    authedFetch<void>(`/departments/${departmentId}/reading-plan-days/${dayId}/completion`, { method: "DELETE" }),
+};
+
+export const pushApi = {
+  getVapidPublicKey: () =>
+    authedFetch<{ publicKey: string }>("/push/vapid-public-key"),
+
+  subscribe: (body: { endpoint: string; p256dh: string; auth: string; userAgent?: string; timezone?: string }) =>
+    authedFetch<void>("/push/subscriptions", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  unsubscribe: (body: { endpoint: string }) =>
+    authedFetch<void>("/push/subscriptions", {
+      method: "DELETE",
+      body: JSON.stringify(body),
+    }),
+
+  getTopics: () =>
+    authedFetch<string[]>("/push/topics"),
+
+  subscribeTopic: (topic: string) =>
+    authedFetch<void>(`/push/topics/${topic}`, { method: "POST" }),
+
+  unsubscribeTopic: (topic: string) =>
+    authedFetch<void>(`/push/topics/${topic}`, { method: "DELETE" }),
+};

@@ -9,12 +9,14 @@ import {
   KeyRound,
   Church,
   Building2,
+  Bell,
   ChevronRight,
   LogOut,
   Loader2,
   CircleHelp,
 } from "lucide-react";
 import { authApi, membersApi } from "@/lib/api";
+import { unsubscribe as pushUnsubscribe } from "@/lib/push";
 import type { User } from "@/types";
 import OnboardingModal from "@/features/onboarding/OnboardingModal";
 import { useOnboarding } from "@/features/onboarding/useOnboarding";
@@ -46,7 +48,13 @@ function MyPage() {
     load();
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await Promise.race([
+        pushUnsubscribe(),
+        new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+      ]);
+    } catch {}
     authApi.logout();
     navigate("/login", { replace: true });
   };
@@ -99,6 +107,19 @@ function MyPage() {
               )}
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md shadow-primary/5">
+        <CardContent className="p-0">
+          <button
+            onClick={() => navigate("/my/notifications")}
+            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
+          >
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="flex-1 text-left text-sm font-medium">알림 설정</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
         </CardContent>
       </Card>
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser } from "lucide-react";
-import { membersApi, departmentsApi, messagesApi, notificationsApi } from "@/lib/api";
+import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight, BookMarked } from "lucide-react";
+import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, readingApi, type AnnouncementItem } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
 import SendMessageModal from "./SendMessageModal";
@@ -23,6 +23,9 @@ function HomePage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [readingEnabled, setReadingEnabled] = useState(false);
+  const [readingUnread, setReadingUnread] = useState(false);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -73,6 +76,30 @@ function HomePage() {
         setBirthdays([]);
       }
 
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (departmentId) {
+          const items = await announcementsApi.getRecent2("DEPARTMENT", departmentId);
+          setAnnouncements(items);
+        }
+      } catch {
+        setAnnouncements([]);
+      }
+
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (departmentId) {
+          const isEnabled = await readingApi.getStatus(departmentId);
+          setReadingEnabled(isEnabled);
+          if (isEnabled) {
+            const today = await readingApi.getToday(departmentId);
+            setReadingUnread(today != null && !today.completed);
+          }
+        }
+      } catch {
+        setReadingEnabled(false);
+      }
+
       setLoading(false);
     };
     load();
@@ -95,6 +122,18 @@ function HomePage() {
             {user?.name ?? "사용자"}님, 반가워요! 👋
           </h2>
           <div className="flex items-center gap-1">
+            {readingEnabled && (
+              <button
+                type="button"
+                className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
+                onClick={() => navigate("/reading")}
+              >
+                <BookMarked className="h-5 w-5" />
+                {readingUnread && (
+                  <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500" />
+                )}
+              </button>
+            )}
             <button
               type="button"
               className="relative shrink-0 p-1.5 text-primary/70 hover:text-primary transition-colors"
@@ -139,15 +178,40 @@ function HomePage() {
         )}
       </section>
 
-      {/* <section>
-        <div className="mb-2 flex items-center gap-2">
-          <Megaphone className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-semibold">공지사항</h3>
+      <section>
+        <div className="mb-2 flex items-baseline justify-between">
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">공지사항</h3>
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => navigate("/announcements")}
+          >
+            더보기 <ChevronRight className="h-3 w-3" />
+          </button>
         </div>
-        <p className="py-4 text-center text-sm text-muted-foreground">
-          공지사항이 없습니다.
-        </p>
-      </section> */}
+        {announcements.length > 0 ? (
+          <div className="space-y-1">
+            {announcements.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="flex w-full items-center gap-2 rounded-md border border-primary/20 px-3 py-2 text-left hover:bg-accent/50 transition-colors"
+                onClick={() => navigate(`/announcements/${item.id}`)}
+              >
+                <span className="min-w-0 flex-1 truncate text-xs font-medium">{item.title}</span>
+                <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="py-1.5 text-center text-sm text-muted-foreground">
+            공지사항이 없습니다.
+          </p>
+        )}
+      </section>
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
@@ -163,7 +227,7 @@ function HomePage() {
         </div>
 
         {birthdays.length > 0 ? (
-          <div className="max-h-[230px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[125px] space-y-1 overflow-y-auto pr-1">
             {(() => {
               const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
               const today = new Date();
@@ -207,11 +271,11 @@ function HomePage() {
                 return (
                   <div
                     key={person.memberId}
-                    className="flex items-center gap-2.5 rounded-lg bg-accent/50 px-3 py-2.5"
+                    className="flex items-center gap-2 rounded-md bg-accent/50 px-3 py-2"
                   >
                     {person.sex && (
                       <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                           person.sex === "M"
                             ? "bg-blue-100 text-blue-600"
                             : "bg-pink-100 text-pink-600"
@@ -220,11 +284,11 @@ function HomePage() {
                         {person.sex === "M" ? "남" : "여"}
                       </span>
                     )}
-                    <span className="text-sm font-medium">{person.name}</span>
-                    <span className="text-xs text-muted-foreground">{dateLabel}</span>
+                    <span className="text-xs font-medium">{person.name}</span>
+                    <span className="text-[11px] text-muted-foreground">{dateLabel}</span>
                     {dDayLabel && (
                       <span
-                        className={`ml-auto shrink-0 text-xs font-semibold ${
+                        className={`ml-auto shrink-0 text-[11px] font-semibold ${
                           person.dDay === 0 ? "text-red-500" : "text-primary/70"
                         }`}
                       >
@@ -244,7 +308,7 @@ function HomePage() {
                           }`}
                           onClick={() => !isSelf && setMessageTarget({ id: person.memberId, name: person.name })}
                         >
-                          <MessageSquareHeart className="h-4 w-4" />
+                          <MessageSquareHeart className="h-3.5 w-3.5" />
                         </button>
                       );
                     })()}

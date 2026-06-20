@@ -79,13 +79,13 @@ function GroupListPage() {
               우리 교회 소모임 {allGroups.length}개
             </span>
           </div>
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-2.5 max-h-[152px] overflow-y-auto space-y-1.5 pr-1">
             {allGroups.map((g) => (
               <div
                 key={g.groupId}
-                className="flex w-[calc(50%-3px)] items-center gap-1.5 rounded-full bg-accent/60 px-2.5 py-1"
+                className="flex w-full items-center gap-1.5 rounded-full bg-accent/60 px-2.5 py-1"
               >
-                <span className="text-xs font-medium truncate">{g.groupName}</span>
+                <span className="text-xs font-medium truncate flex-1">{g.groupName}</span>
                 {g.leaderName && (
                   <span className="flex items-center gap-1 shrink-0">
                     <span className="text-[11px] text-muted-foreground">{g.leaderName}</span>

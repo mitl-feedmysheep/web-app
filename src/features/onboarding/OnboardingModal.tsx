@@ -92,7 +92,8 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
     if (animating || !isOpen || !containerRef.current) return;
 
     const slide = ONBOARDING_SLIDES[currentIndex];
-    if (slide.floatingBadge?.calloutDirection !== "up-right") {
+    const firstUpRight = slide.floatingBadges?.find((b) => b.calloutDirection === "up-right");
+    if (!firstUpRight) {
       setCalloutTailRight(null);
       return;
     }
@@ -118,7 +119,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
   const slide = ONBOARDING_SLIDES[currentIndex];
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === ONBOARDING_SLIDES.length - 1;
-  const { MockComponent, hasHighlight, tooltipText, tooltipPosition, activeTab, activeTabLabel, floatingBadge } = slide;
+  const { MockComponent, hasHighlight, tooltipText, tooltipPosition, tooltipArrow = "left", activeTab, activeTabLabel, floatingBadges } = slide;
 
   const transition = (fn: () => void) => {
     if (animating) return;
@@ -202,9 +203,9 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 style={getTooltipStyle()}
               >
                 {tooltipPosition === "bottom" ? (
-                  <div className="absolute -top-2 left-8 h-0 w-0 border-x-8 border-b-8 border-x-transparent border-b-white" />
+                  <div className={`absolute -top-2 h-0 w-0 border-x-8 border-b-8 border-x-transparent border-b-white ${tooltipArrow === "right" ? "right-8" : "left-8"}`} />
                 ) : (
-                  <div className="absolute -bottom-2 left-8 h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-white" />
+                  <div className={`absolute -bottom-2 h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-white ${tooltipArrow === "right" ? "right-8" : "left-8"}`} />
                 )}
                 <p
                   className="text-sm leading-relaxed"
@@ -246,34 +247,27 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           </div>
         )}
 
-        {/* 교적부 같은 부가 배지 */}
-        {floatingBadge && hasHighlight && (
+        {/* 부가 설명 배지들 */}
+        {hasHighlight && floatingBadges?.map((badge, i) => (
           <div
+            key={i}
             className="pointer-events-none absolute z-[125]"
-            style={{
-              top: floatingBadge.top,
-              right: floatingBadge.right,
-              left: floatingBadge.left,
-            }}
+            style={{ top: badge.top, right: badge.right, left: badge.left }}
           >
-            {floatingBadge.callout ? (
+            {badge.callout ? (
               <div className="relative rounded-lg border border-primary/30 bg-white px-3 py-1.5">
-                <span className="text-sm font-semibold text-primary">{floatingBadge.label}</span>
-                {floatingBadge.calloutDirection === "up" ? (
+                <span className="text-sm font-semibold text-primary">{badge.label}</span>
+                {badge.calloutDirection === "up" ? (
                   <>
-                    {/* 위쪽 말풍선 꼬리 (outer border) */}
                     <div className="absolute -top-[8px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary/30" />
-                    {/* 위쪽 말풍선 꼬리 (inner fill) */}
                     <div className="absolute -top-[6px] left-1/2 -translate-x-1/2 h-0 w-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" />
                   </>
-                ) : floatingBadge.calloutDirection === "up-right" ? (
+                ) : badge.calloutDirection === "up-right" ? (
                   <>
-                    {/* 오른쪽 위 말풍선 꼬리 (outer border) - 교적부 아이콘 중심으로 동적 정렬 */}
                     <div
                       className="absolute -top-[8px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary/30"
                       style={{ right: calloutTailRight !== null ? `${calloutTailRight}px` : "82px" }}
                     />
-                    {/* 오른쪽 위 말풍선 꼬리 (inner fill) */}
                     <div
                       className="absolute -top-[6px] h-0 w-0 border-l-[5px] border-r-[5px] border-b-[7px] border-l-transparent border-r-transparent border-b-white"
                       style={{ right: calloutTailRight !== null ? `${calloutTailRight}px` : "82px" }}
@@ -281,20 +275,18 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   </>
                 ) : (
                   <>
-                    {/* 오른쪽 말풍선 꼬리 (outer border) */}
                     <div className="absolute -right-[8px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[6px] border-b-[6px] border-l-[8px] border-t-transparent border-b-transparent border-l-primary/30" />
-                    {/* 오른쪽 말풍선 꼬리 (inner fill) */}
                     <div className="absolute -right-[6px] top-1/2 -translate-y-1/2 h-0 w-0 border-t-[5px] border-b-[5px] border-l-[6px] border-t-transparent border-b-transparent border-l-white" />
                   </>
                 )}
               </div>
             ) : (
               <div className="flex items-center gap-1 rounded-full border border-primary/40 bg-white px-2.5 py-1 shadow-md">
-                <span className="text-[11px] font-semibold text-primary">{floatingBadge.label}</span>
+                <span className="text-[11px] font-semibold text-primary">{badge.label}</span>
               </div>
             )}
           </div>
-        )}
+        ))}
       </div>
 
       {/* 하단 컨트롤 바 */}

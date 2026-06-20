@@ -42,11 +42,11 @@ function GatheringSlide() {
                 <Calendar className="h-4 w-4 shrink-0 text-primary" />
                 <span className="font-medium">2025년 3월 20일 (목)</span>
               </div>
-              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2.5 text-sm">
                 <MapPin className="h-4 w-4 shrink-0" />
                 <span>교회 2층 소그룹 룸</span>
               </div>
-              <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2.5 text-sm">
                 <Clock className="h-4 w-4 shrink-0" />
                 <span>오후 7:00 – 9:00</span>
               </div>

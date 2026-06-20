@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import AppShell from "@/components/layout/AppShell";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SplashScreen from "@/features/auth/SplashScreen";
@@ -20,17 +20,33 @@ import MyPage from "@/features/my/MyPage";
 import AccountPage from "@/features/my/AccountPage";
 import ChangePasswordPage from "@/features/my/ChangePasswordPage";
 import SelectDepartmentPage from "@/features/my/SelectDepartmentPage";
+import NotificationSettingsPage from "@/features/my/NotificationSettingsPage";
 import MessagesPage from "@/features/messages/MessagesPage";
 import NotificationsPage from "@/features/notifications/NotificationsPage";
 import GroupManagePage from "@/features/group/GroupManagePage";
 import SermonNotesPage from "@/features/sermon-notes/SermonNotesPage";
 import CreateSermonNotePage from "@/features/sermon-notes/CreateSermonNotePage";
 import SermonNoteDetailPage from "@/features/sermon-notes/SermonNoteDetailPage";
+import AnnouncementsPage from "@/features/announcements/AnnouncementsPage";
+import AnnouncementDetailPage from "@/features/announcements/AnnouncementDetailPage";
+import ReadingTodayPage from "@/features/reading/ReadingTodayPage";
+import ReadingProgressPage from "@/features/reading/ReadingProgressPage";
 
 function isSplashEnabled(): boolean {
   const raw = String(import.meta.env.VITE_IS_SPLASH_ON ?? "true").toLowerCase();
   if (!["true", "1", "yes", "on"].includes(raw)) return false;
   return localStorage.getItem("splash.seen") !== "true";
+}
+
+function SwNavigateHandler() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    (window as Window & { __swNavigate?: (url: string) => void }).__swNavigate = navigate;
+    return () => {
+      delete (window as Window & { __swNavigate?: (url: string) => void }).__swNavigate;
+    };
+  }, [navigate]);
+  return null;
 }
 
 function App() {
@@ -47,6 +63,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <SwNavigateHandler />
       <Routes>
         <Route element={<AppShell />}>
           {/* Public - Auth */}
@@ -71,8 +88,13 @@ function App() {
             <Route path="/my/account" element={<AccountPage />} />
             <Route path="/my/password" element={<ChangePasswordPage />} />
             <Route path="/my/department" element={<SelectDepartmentPage />} />
+            <Route path="/my/notifications" element={<NotificationSettingsPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/announcements" element={<AnnouncementsPage />} />
+            <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+            <Route path="/reading" element={<ReadingTodayPage />} />
+            <Route path="/reading/progress" element={<ReadingProgressPage />} />
 
             <Route path="/groups/:groupId" element={<GroupDetailPage />} />
             <Route path="/groups/:groupId/manage" element={<GroupManagePage />} />

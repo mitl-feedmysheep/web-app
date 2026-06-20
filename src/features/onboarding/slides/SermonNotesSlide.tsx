@@ -8,7 +8,8 @@ const MOCK_NOTES = [
     title: "하나님의 은혜",
     serviceType: "주일 예배",
     preacher: "이목사",
-    date: "2025-03-23",
+    date: "3월 23일",
+    scripture: "요한복음 3:16",
     preview: "오늘 설교에서 하나님의 무조건적인 사랑과 은혜에 대해 배웠습니다.",
   },
   {
@@ -16,7 +17,8 @@ const MOCK_NOTES = [
     title: "믿음으로 나아가라",
     serviceType: "수요 예배",
     preacher: "김목사",
-    date: "2025-03-19",
+    date: "3월 19일",
+    scripture: "히브리서 11:1",
     preview: "히브리서 11장을 통해 믿음의 선진들이 어떻게 살았는지 배웠습니다.",
   },
 ];
@@ -45,26 +47,29 @@ function SermonNotesSlide() {
               <p className="text-xs font-semibold text-muted-foreground">2025년 3월</p>
               <div className="space-y-2">
                 {MOCK_NOTES.map((note) => (
-                  <Card key={note.id} className="border-0 shadow-md shadow-primary/5">
-                    <CardContent className="p-4">
-                      <div className="mb-1.5 flex items-start justify-between">
-                        <h3 className="font-semibold leading-tight">{note.title}</h3>
-                        <span className="ml-2 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                          {note.serviceType}
-                        </span>
-                      </div>
-                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                        {note.preview}
-                      </p>
-                      <div className="mt-2.5 flex items-center gap-3 text-[10px] text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {note.date}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <UserIcon className="h-3 w-3" />
-                          {note.preacher}
-                        </span>
+                  <Card key={note.id} className="border border-transparent bg-accent/60 shadow-none">
+                    <CardContent className="py-3">
+                      <div className="space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-medium leading-snug line-clamp-1">{note.title}</p>
+                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                            {note.serviceType}
+                          </span>
+                        </div>
+                        <p className="text-xs text-foreground/70 line-clamp-1">📖 {note.scripture}</p>
+                        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground/70">
+                          {note.preview}
+                        </p>
+                        <div className="flex items-center gap-3 pt-0.5">
+                          <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60">
+                            <Calendar className="h-3 w-3" />
+                            {note.date}
+                          </span>
+                          <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60">
+                            <UserIcon className="h-3 w-3" />
+                            {note.preacher}
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

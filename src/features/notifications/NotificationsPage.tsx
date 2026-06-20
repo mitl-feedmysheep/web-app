@@ -38,6 +38,11 @@ function NotificationsPage() {
     load();
   }, []);
 
+  const getMessage = (item: NotificationItem) =>
+    item.type === "READING_PLAN_ACTIVATED" && item.description
+      ? item.description
+      : (TYPE_MESSAGE[item.type] ?? item.type);
+
   const handleClick = async (item: NotificationItem) => {
     if (!item.isRead) {
       setNotifications((prev) =>
@@ -93,7 +98,8 @@ function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {notifications.map((item) => {
-            const message = TYPE_MESSAGE[item.type] ?? item.type;
+            const message = getMessage(item);
+            const showDescription = item.type !== "READING_PLAN_ACTIVATED" && item.description;
 
             if (!item.isRead) {
               return (
@@ -113,7 +119,7 @@ function NotificationsPage() {
                     </span>
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </div>
-                  {item.description && (
+                  {showDescription && (
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {item.description}
                     </p>
