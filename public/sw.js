@@ -1,5 +1,31 @@
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+const SHELL_CACHE = "mitl-shell-v1";
+
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(SHELL_CACHE).then((cache) => cache.add("/index.html"))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((keys) =>
+        Promise.all(keys.filter((k) => k !== SHELL_CACHE).map((k) => caches.delete(k)))
+      ),
+    ])
+  );
+});
+
+// SPA 라우팅: 서버에 없는 경로(예: /prayers) 새로고침 시 index.html로 응답
+self.addEventListener("fetch", (e) => {
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch("/index.html").catch(() => caches.match("/index.html"))
+    );
+  }
+});
 
 self.addEventListener("push", (e) => {
   if (!e.data) return;

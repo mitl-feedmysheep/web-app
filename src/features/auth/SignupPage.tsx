@@ -3,6 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ApiError, authApi } from "@/lib/api";
@@ -40,6 +47,8 @@ function SignupPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPostcode, setShowPostcode] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showPrivacySheet, setShowPrivacySheet] = useState(false);
 
   // Phone check
   const [phoneLoading, setPhoneLoading] = useState(false);
@@ -81,12 +90,13 @@ function SignupPage() {
       !phoneDuplicate &&
       emailVerifySuccess &&
       !emailSendError &&
-      !phoneError
+      !phoneError &&
+      privacyAgreed
     );
   }, [
     name, gender, birthDate, phone, email, password, passwordConfirm,
     postcode, address1, phoneChecked, phoneDuplicate, phoneError,
-    emailVerifySuccess, emailSendError,
+    emailVerifySuccess, emailSendError, privacyAgreed,
   ]);
 
   const handleBirthDateChange = (raw: string) => {
@@ -424,12 +434,32 @@ function SignupPage() {
             placeholder="상세주소"
           />
         </div>
+
+        {/* 개인정보 동의 */}
+        <div className="flex items-center gap-2.5 rounded-lg border px-4 py-3.5">
+          <Checkbox
+            id="privacy-agree"
+            checked={privacyAgreed}
+            onCheckedChange={(checked) => setPrivacyAgreed(Boolean(checked))}
+            className="shrink-0"
+          />
+          <label htmlFor="privacy-agree" className="text-sm font-medium leading-none cursor-pointer">
+            개인정보 수집 및 이용에 동의합니다 <span className="text-destructive">*</span>
+          </label>
+          <button
+            type="button"
+            className="shrink-0 text-xs text-primary underline underline-offset-2 leading-none"
+            onClick={() => setShowPrivacySheet(true)}
+          >
+            전체보기
+          </button>
+        </div>
       </div>
 
       {/* Bottom fixed */}
       <div className="sticky bottom-0 space-y-2 border-t bg-background px-4 py-3">
         <Button
-          className="w-full"
+          className="w-full h-12 text-base"
           onClick={handleSubmit}
           disabled={!canProceed || isLoading}
         >
@@ -456,6 +486,57 @@ function SignupPage() {
           });
         }}
       />
+
+      {/* 개인정보 수집 및 이용 동의 Sheet */}
+      <Sheet open={showPrivacySheet} onOpenChange={(o) => !o && setShowPrivacySheet(false)}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-2xl flex flex-col max-h-[85dvh]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          <SheetHeader className="shrink-0 pr-8">
+            <SheetTitle>개인정보 수집 및 이용 동의</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-5 text-sm leading-relaxed">
+            <section className="space-y-1.5">
+              <h3 className="font-semibold text-foreground">1. 수집하는 개인정보 항목</h3>
+              <ul className="text-muted-foreground space-y-1 list-disc pl-5">
+                <li>가입 시 수집: 이름, 생년월일, 성별, 휴대전화번호, 이메일 주소, 주소</li>
+                <li>서비스 이용 중 생성된 정보</li>
+              </ul>
+            </section>
+            <section className="space-y-1.5">
+              <h3 className="font-semibold text-foreground">2. 개인정보의 수집 및 이용 목적</h3>
+              <ul className="text-muted-foreground space-y-1 list-disc pl-5">
+                <li>회원 가입 및 본인 확인</li>
+                <li>부서 및 소그룹 활동 관리 (출석, 기도제목, 모임 기록)</li>
+                <li>회원 간 메시지 서비스 제공</li>
+                <li>심방 등 목회 활동 지원</li>
+                <li>서비스 관련 알림 발송</li>
+                <li>서비스 이용 문의 및 고충 처리</li>
+              </ul>
+            </section>
+            <section className="space-y-1.5">
+              <h3 className="font-semibold text-foreground">3. 개인정보의 보유 및 이용 기간</h3>
+              <p className="text-muted-foreground">
+                회원 탈퇴 시까지 보유합니다. 단, 관련 법령에 따라 보존이 필요한 경우 해당 법령에서 정한 기간 동안 보존합니다.
+              </p>
+            </section>
+            <section className="space-y-1.5">
+              <h3 className="font-semibold text-foreground">4. 개인정보 제3자 제공</h3>
+              <p className="text-muted-foreground">
+                수집한 개인정보는 원칙적으로 외부에 제공하지 않습니다. 다만, 소속 교회의 담당자(목회자, 부서 관리자)에게 교회 서비스 운영 목적으로 제공되며, 해당 교회의 서비스 이용 기간 동안 보유됩니다.
+              </p>
+            </section>
+            <section className="space-y-1.5">
+              <h3 className="font-semibold text-foreground">5. 동의 거부 권리 및 불이익</h3>
+              <p className="text-muted-foreground">
+                개인정보 수집 및 이용에 대한 동의를 거부하실 수 있으나, 동의를 거부하시는 경우 서비스 이용이 제한됩니다.
+              </p>
+            </section>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -23,7 +23,9 @@ function AppShell() {
   }, [navigate]);
 
   useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
     if (
+      authToken &&
       isSupported() &&
       getPermission() === "default" &&
       !localStorage.getItem(NOTIFICATION_PROMPTED_KEY)

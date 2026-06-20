@@ -47,17 +47,17 @@ function HomePage() {
 
   useEffect(() => {
     const load = async () => {
-      const churchId = localStorage.getItem("churchId");
-      if (!churchId) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const me = await membersApi.getMyInfo();
         setUser(me);
       } catch {
         // ignore
+      }
+
+      const churchId = localStorage.getItem("churchId");
+      if (!churchId) {
+        setLoading(false);
+        return;
       }
 
       try {
