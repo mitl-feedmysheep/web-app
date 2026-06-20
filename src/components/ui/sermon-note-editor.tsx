@@ -114,16 +114,6 @@ export function SermonNoteEditor({
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={handleIndent}
-            disabled={!canIndent}
-            className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:bg-accent disabled:opacity-30"
-            title="들여쓰기"
-          >
-            <Indent className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
             onClick={() =>
               editor.chain().focus().liftListItem("listItem").run()
             }
@@ -132,6 +122,16 @@ export function SermonNoteEditor({
             title="내어쓰기"
           >
             <Outdent className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={handleIndent}
+            disabled={!canIndent}
+            className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:bg-accent disabled:opacity-30"
+            title="들여쓰기"
+          >
+            <Indent className="h-4 w-4" />
           </button>
         </div>
         <div className="overflow-y-auto bg-transparent px-3 py-2 text-[15px]" style={{ maxHeight: "calc(100dvh - 22rem)" }}>
