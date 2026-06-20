@@ -93,14 +93,14 @@ function NotificationSettingsPage() {
       if (checked) {
         await pushApi.subscribeTopic("READING");
         setReadingEnabled(true);
-        toast.success("리딩지저스 매일 알림이 활성화됐어요.");
+        toast.success("성경읽기 매일 알림이 활성화됐어요.");
       } else {
         await pushApi.unsubscribeTopic("READING");
         setReadingEnabled(false);
-        toast.success("리딩지저스 매일 알림이 비활성화됐어요.");
+        toast.success("성경읽기 매일 알림이 비활성화됐어요.");
       }
     } catch {
-      toast.error("리딩지저스 알림 설정 중 오류가 발생했습니다.");
+      toast.error("성경읽기 알림 설정 중 오류가 발생했습니다.");
     } finally {
       setReadingLoading(false);
     }
