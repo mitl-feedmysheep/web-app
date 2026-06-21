@@ -573,7 +573,7 @@ export interface AnnouncementItem {
   entityType: string;
   entityId: string;
   title: string;
-  body: string;
+  body: string | null;
   sendAt: string;
   isSent: boolean;
   createdAt: string;
@@ -593,6 +593,11 @@ export const announcementsApi = {
 
   getById: (id: string) =>
     authedFetch<AnnouncementItem>(`/announcements/${id}`),
+
+  getBulletins: (departmentId: string) =>
+    authedFetch<AnnouncementItem[]>(
+      `/announcements?entityType=DEPARTMENT&entityId=${departmentId}&type=BULLETIN`,
+    ),
 };
 
 export const readingApi = {

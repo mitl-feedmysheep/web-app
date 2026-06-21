@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Megaphone, Bell, ChevronRight } from "lucide-react";
+import { ArrowLeft, Loader2, Megaphone, Bell, ChevronRight, Newspaper } from "lucide-react";
 import { announcementsApi } from "@/lib/api";
 import type { AnnouncementItem } from "@/lib/api";
 
@@ -69,12 +69,73 @@ function AnnouncementList({ type }: { type: "ANNOUNCEMENT" | "BROADCAST" }) {
   );
 }
 
+function BulletinList() {
+  const navigate = useNavigate();
+  const [items, setItems] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (!departmentId) return;
+        const data = await announcementsApi.getBulletins(departmentId);
+        setItems(data);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[40dvh] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <p className="py-12 text-center text-sm text-muted-foreground">등록된 주보가 없습니다.</p>
+    );
+  }
+
+  return (
+    <div className="divide-y divide-border/50">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          className="flex w-full items-start justify-between gap-2 py-4 text-left hover:bg-accent/30 transition-colors -mx-4 px-4"
+          onClick={() => navigate(`/bulletins/${item.id}`)}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Newspaper className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground/70">
+                {formatDate(item.createdAt)}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function AnnouncementsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = (searchParams.get("tab") ?? "announcement") as "announcement" | "broadcast";
+  const tab = (searchParams.get("tab") ?? "announcement") as "announcement" | "bulletin" | "broadcast";
 
-  const setTab = (t: "announcement" | "broadcast") => {
+  const setTab = (t: "announcement" | "bulletin" | "broadcast") => {
     setSearchParams({ tab: t }, { replace: true });
   };
 
@@ -107,6 +168,18 @@ function AnnouncementsPage() {
           </button>
           <button
             type="button"
+            onClick={() => setTab("bulletin")}
+            className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors border-b-2 ${
+              tab === "bulletin"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Newspaper className="h-3.5 w-3.5" />
+            주보
+          </button>
+          <button
+            type="button"
             onClick={() => setTab("broadcast")}
             className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors border-b-2 ${
               tab === "broadcast"
@@ -121,11 +194,9 @@ function AnnouncementsPage() {
       </div>
 
       <div className="px-4 pt-4">
-        {tab === "announcement" ? (
-          <AnnouncementList type="ANNOUNCEMENT" />
-        ) : (
-          <AnnouncementList type="BROADCAST" />
-        )}
+        {tab === "announcement" && <AnnouncementList type="ANNOUNCEMENT" />}
+        {tab === "bulletin" && <BulletinList />}
+        {tab === "broadcast" && <AnnouncementList type="BROADCAST" />}
       </div>
     </div>
   );

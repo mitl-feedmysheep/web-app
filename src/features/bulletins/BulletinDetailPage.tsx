@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Loader2, X, ChevronLeft, ChevronRight, Newspaper } from "lucide-react";
 import { announcementsApi } from "@/lib/api";
 import type { AnnouncementItem } from "@/lib/api";
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-}
 
 function Lightbox({
   images,
@@ -134,7 +129,7 @@ function Lightbox({
       <img
         src={images[index]}
         alt=""
-        className="max-h-[85dvh] max-w-[90vw] rounded-md object-contain select-none"
+        className="max-h-[90dvh] max-w-[95vw] object-contain select-none"
         draggable={false}
         style={{
           transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
@@ -172,10 +167,10 @@ function Lightbox({
   );
 }
 
-function AnnouncementDetailPage() {
+function BulletinDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [announcement, setAnnouncement] = useState<AnnouncementItem | null>(null);
+  const [bulletin, setBulletin] = useState<AnnouncementItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -184,9 +179,9 @@ function AnnouncementDetailPage() {
     const load = async () => {
       try {
         const data = await announcementsApi.getById(id);
-        setAnnouncement(data);
+        setBulletin(data);
       } catch {
-        navigate("/announcements");
+        navigate("/announcements?tab=bulletin");
       } finally {
         setLoading(false);
       }
@@ -202,9 +197,9 @@ function AnnouncementDetailPage() {
     );
   }
 
-  if (!announcement) return null;
+  if (!bulletin) return null;
 
-  const images = announcement.images ?? [];
+  const images = bulletin.images ?? [];
 
   return (
     <div className="min-h-dvh pb-8">
@@ -216,42 +211,38 @@ function AnnouncementDetailPage() {
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
+        <h1 className="text-base font-semibold">{bulletin.title}</h1>
       </div>
 
       <div className="px-4 pt-6">
-        <h1 className="text-xl font-bold leading-tight">{announcement.title}</h1>
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          {formatDate(announcement.sendAt)}
-        </div>
-
-        <div className="mt-6 h-px bg-border/50" />
-
-        {announcement.body && (
-          <p className="mt-6 whitespace-pre-wrap text-[15px] leading-[1.8] text-foreground/85">
-            {announcement.body}
+        {bulletin.body && (
+          <p className="mb-6 whitespace-pre-wrap text-[15px] leading-[1.8] text-foreground/85">
+            {bulletin.body}
           </p>
         )}
 
-        {images.length > 0 && (
-          <div className="mt-6">
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {images.map((url, i) => (
-                <button
-                  key={url}
-                  type="button"
-                  onClick={() => setLightboxIndex(i)}
-                  className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border/50"
-                >
-                  <img
-                    src={url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    draggable={false}
-                  />
-                </button>
-              ))}
-            </div>
+        {images.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+            <Newspaper className="h-10 w-10 opacity-30" />
+            <p className="text-sm">주보 이미지가 없습니다.</p>
+          </div>
+        ) : (
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {images.map((url, i) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => setLightboxIndex(i)}
+                className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border/50"
+              >
+                <img
+                  src={url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -267,4 +258,4 @@ function AnnouncementDetailPage() {
   );
 }
 
-export default AnnouncementDetailPage;
+export default BulletinDetailPage;

@@ -38,6 +38,164 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { GatheringDetail, GatheringMember, User, EducationProgram, EducationProgress } from "@/types";
 
+function Lightbox({
+  images,
+  initialIndex,
+  onClose,
+}: {
+  images: string[];
+  initialIndex: number;
+  onClose: () => void;
+}) {
+  const [index, setIndex] = useState(initialIndex);
+  const [scale, setScale] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+  const [isPinching, setIsPinching] = useState(false);
+
+  const pinchStartRef = useRef<{ dist: number; scale: number } | null>(null);
+  const panStartRef = useRef<{ touchX: number; touchY: number; transX: number; transY: number } | null>(null);
+  const swipeStartRef = useRef<number | null>(null);
+
+  const resetTransform = () => {
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+  };
+
+  const goTo = (newIndex: number) => {
+    resetTransform();
+    setIndex(newIndex);
+  };
+  const prev = () => goTo((index - 1 + images.length) % images.length);
+  const next = () => goTo((index + 1) % images.length);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  const pinchDist = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchStartRef.current = { dist: pinchDist(e.touches), scale };
+      setIsPinching(true);
+      swipeStartRef.current = null;
+      panStartRef.current = null;
+    } else if (e.touches.length === 1) {
+      if (scale > 1) {
+        panStartRef.current = {
+          touchX: e.touches[0].clientX,
+          touchY: e.touches[0].clientY,
+          transX: translate.x,
+          transY: translate.y,
+        };
+        swipeStartRef.current = null;
+      } else {
+        swipeStartRef.current = e.touches[0].clientX;
+        panStartRef.current = null;
+      }
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchStartRef.current) {
+      const newDist = pinchDist(e.touches);
+      const newScale = Math.max(1, Math.min(5, pinchStartRef.current.scale * (newDist / pinchStartRef.current.dist)));
+      setScale(newScale);
+      if (newScale <= 1) setTranslate({ x: 0, y: 0 });
+    } else if (e.touches.length === 1 && panStartRef.current && scale > 1) {
+      const dx = e.touches[0].clientX - panStartRef.current.touchX;
+      const dy = e.touches[0].clientY - panStartRef.current.touchY;
+      setTranslate({ x: panStartRef.current.transX + dx, y: panStartRef.current.transY + dy });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (e.touches.length < 2 && pinchStartRef.current) {
+      pinchStartRef.current = null;
+      setIsPinching(false);
+      if (scale < 1.05) resetTransform();
+    }
+    if (e.touches.length === 0) {
+      panStartRef.current = null;
+      if (swipeStartRef.current !== null && scale <= 1) {
+        const delta = e.changedTouches[0].clientX - swipeStartRef.current;
+        if (Math.abs(delta) > 50) delta < 0 ? next() : prev();
+        swipeStartRef.current = null;
+      }
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/90"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white"
+      >
+        <X className="h-5 w-5" />
+      </button>
+
+      {images.length > 1 && scale <= 1 && (
+        <button
+          type="button"
+          onClick={prev}
+          className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+      )}
+
+      <img
+        src={images[index]}
+        alt=""
+        className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl select-none"
+        crossOrigin="anonymous"
+        draggable={false}
+        style={{
+          transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+          transformOrigin: "center",
+          willChange: "transform",
+          transition: isPinching ? "none" : "transform 0.15s ease",
+          cursor: scale > 1 ? "grab" : "default",
+          touchAction: "none",
+        }}
+      />
+
+      {images.length > 1 && scale <= 1 && (
+        <button
+          type="button"
+          onClick={next}
+          className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
+
+      {images.length > 1 && (
+        <div className="absolute bottom-4 z-10 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white">
+          <span>{index + 1}</span>
+          <span className="text-white/50"> / {images.length}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function GatheringDetailPage() {
   const { groupId, gatheringId } = useParams<{
     groupId: string;
@@ -181,13 +339,6 @@ function GatheringDetailPage() {
       return next;
     }, { replace: true });
   }, [fromNotification, gathering, myInfo, loading]);
-
-  useEffect(() => {
-    if (previewIndex !== null) {
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
-    }
-  }, [previewIndex]);
 
   const handleMeetingChange = (field: string, value: string) => {
     setMeetingForm((prev) => ({ ...prev, [field]: value }));
@@ -558,50 +709,12 @@ function GatheringDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Photo Preview ── */}
-      {previewIndex !== null && mediumPhotos[previewIndex] && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) setPreviewIndex(null); }}
-        >
-          <button
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white"
-            onClick={() => setPreviewIndex(null)}
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          {previewIndex > 0 && (
-            <button
-              className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
-              onClick={() => setPreviewIndex(previewIndex - 1)}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          )}
-
-          {previewIndex < mediumPhotos.length - 1 && (
-            <button
-              className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white"
-              onClick={() => setPreviewIndex(previewIndex + 1)}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          )}
-
-          <div className="absolute bottom-4 z-10 rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white">
-            <span>{previewIndex + 1}</span>
-            <span className="text-white/50"> / {mediumPhotos.length}</span>
-          </div>
-
-          <img
-            src={mediumPhotos[previewIndex].url}
-            alt=""
-            className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
-            crossOrigin="anonymous"
-            style={{ WebkitTouchCallout: "default" } as React.CSSProperties}
-          />
-        </div>
+      {previewIndex !== null && (
+        <Lightbox
+          images={mediumPhotos.map((m) => m.url)}
+          initialIndex={previewIndex}
+          onClose={() => setPreviewIndex(null)}
+        />
       )}
 
       {/* ── View Toggle ── */}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight, BookMarked } from "lucide-react";
+import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, ChevronRight, BookMarked, Newspaper } from "lucide-react";
 import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, readingApi, type AnnouncementItem } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
@@ -24,6 +24,7 @@ function HomePage() {
   const [notifUnreadCount, setNotifUnreadCount] = useState(0);
   const [homeSummary, setHomeSummary] = useState<HomeSummary | null>(null);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [thisWeekBulletin, setThisWeekBulletin] = useState<AnnouncementItem | null>(null);
   const [readingEnabled, setReadingEnabled] = useState(false);
   const [readingUnread, setReadingUnread] = useState(false);
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
@@ -84,6 +85,29 @@ function HomePage() {
         }
       } catch {
         setAnnouncements([]);
+      }
+
+      try {
+        const departmentId = localStorage.getItem("departmentId");
+        if (departmentId) {
+          const bulletins = await announcementsApi.getBulletins(departmentId);
+          const now = new Date();
+          const day = now.getDay();
+          const diffToMonday = (day === 0 ? -6 : 1 - day);
+          const monday = new Date(now);
+          monday.setHours(0, 0, 0, 0);
+          monday.setDate(now.getDate() + diffToMonday);
+          const sunday = new Date(monday);
+          sunday.setDate(monday.getDate() + 6);
+          sunday.setHours(23, 59, 59, 999);
+          const thisWeek = bulletins.find((b) => {
+            const created = new Date(b.createdAt);
+            return created >= monday && created <= sunday;
+          });
+          setThisWeekBulletin(thisWeek ?? null);
+        }
+      } catch {
+        setThisWeekBulletin(null);
       }
 
       try {
@@ -177,6 +201,26 @@ function HomePage() {
           </p>
         )}
       </section>
+
+      {thisWeekBulletin && (
+        <section>
+          <div className="mb-2 flex items-center gap-2">
+            <Newspaper className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">이번 주 주보</h3>
+          </div>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between gap-3 rounded-xl border border-border/60 bg-accent/30 px-4 py-3 text-left transition-colors hover:bg-accent/50"
+            onClick={() => navigate(`/bulletins/${thisWeekBulletin.id}`)}
+          >
+            <div className="flex items-center gap-2.5">
+              <Newspaper className="h-5 w-5 shrink-0 text-primary/70" />
+              <span className="text-sm font-medium">{thisWeekBulletin.title}</span>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+          </button>
+        </section>
+      )}
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
