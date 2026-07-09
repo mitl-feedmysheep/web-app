@@ -19,6 +19,7 @@ import {
   LogOut,
   Search,
   ChevronLeft,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { authApi, churchesApi, departmentsApi } from "@/lib/api";
@@ -42,12 +43,25 @@ function RequestChurchPage() {
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [loadingDepts, setLoadingDepts] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [lastDeclinedChurchName, setLastDeclinedChurchName] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await churchesApi.getAllChurches();
-        setChurches(data);
+        const [churches, requests] = await Promise.all([
+          churchesApi.getAllChurches(),
+          churchesApi.getMyJoinRequests().catch(() => []),
+        ]);
+        setChurches(churches);
+
+        if (requests.length > 0) {
+          const latest = requests.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+          if (latest.status === "DECLINED") {
+            setLastDeclinedChurchName(latest.churchName);
+          }
+        }
       } catch {
         // silently handle
       } finally {
@@ -147,6 +161,17 @@ function RequestChurchPage() {
       <div className="mx-auto w-full max-w-sm">
         {step === "church" ? (
           <>
+            {/* 거절 안내 배너 */}
+            {lastDeclinedChurchName && (
+              <div className="mb-4 flex items-start gap-2 rounded-lg bg-destructive/10 px-3 py-3 text-sm text-destructive">
+                <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p>
+                  <span className="font-semibold">{lastDeclinedChurchName}</span>
+                  의 등록 요청이 거절되었어요. 다시 요청해주세요.
+                </p>
+              </div>
+            )}
+
             {/* Search */}
             {churches.length > 0 && (
               <div className="relative mb-4">
