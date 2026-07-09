@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigationType } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { notificationsApi } from "@/lib/api";
 
@@ -22,6 +22,7 @@ const TYPE_MESSAGE: Record<string, string> = {
 
 function NotificationsPage() {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -84,7 +85,7 @@ function NotificationsPage() {
       <div className="mb-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/", { replace: true }))}
+          onClick={() => (navigationType === "PUSH" ? navigate(-1) : navigate("/", { replace: true }))}
           className="p-1 text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="h-5 w-5" />
