@@ -5,7 +5,7 @@ import BottomNav from "./BottomNav";
 import { Toaster } from "@/components/ui/sonner";
 import { setGlobalNavigate, setGlobalToast } from "@/lib/auth-handler";
 import { NotificationPromptSheet } from "@/components/NotificationPromptSheet";
-import { isSupported, getPermission } from "@/lib/push";
+import { isSupported, getPermission, silentSync } from "@/lib/push";
 
 const MAIN_TABS = ["/", "/groups", "/prayers", "/sermon-notes", "/my"];
 const NOTIFICATION_PROMPTED_KEY = "notification.prompted";
@@ -23,6 +23,11 @@ function AppShell() {
   }, [navigate]);
 
   useEffect(() => {
+    silentSync();
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== "/") return;
     const authToken = localStorage.getItem("authToken");
     if (
       authToken &&
@@ -33,7 +38,7 @@ function AppShell() {
       const timer = setTimeout(() => setShowNotificationPrompt(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [pathname]);
 
   const handleNotificationPromptClose = () => {
     localStorage.setItem(NOTIFICATION_PROMPTED_KEY, "1");

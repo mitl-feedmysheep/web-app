@@ -60,6 +60,7 @@ export async function subscribe(): Promise<boolean> {
     throw new Error("[push] backend subscribe failed: " + e);
   });
 
+  localStorage.setItem("push.endpoint", subscription.endpoint);
   return true;
 }
 
@@ -74,6 +75,44 @@ export async function unsubscribe(): Promise<void> {
     subscription.unsubscribe(),
     pushApi.unsubscribe({ endpoint: subscription.endpoint }).catch(() => {}),
   ]);
+  localStorage.removeItem("push.endpoint");
+}
+
+export async function silentSync(): Promise<void> {
+  if (!isSupported() || getPermission() !== "granted") return;
+
+  const registration = await navigator.serviceWorker.ready.catch(() => null);
+  if (!registration) return;
+
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    const vapid = await pushApi.getVapidPublicKey().catch(() => null);
+    if (!vapid) return;
+
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapid.publicKey).buffer as ArrayBuffer,
+    }).catch(() => null);
+
+    if (!subscription) return;
+  }
+
+  const endpoint = subscription.endpoint;
+  if (endpoint === localStorage.getItem("push.endpoint")) return;
+
+  const keys = subscription.toJSON().keys ?? {};
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  await pushApi.subscribe({
+    endpoint,
+    p256dh: keys.p256dh ?? "",
+    auth: keys.auth ?? "",
+    userAgent: navigator.userAgent,
+    timezone,
+  }).catch(() => null);
+
+  localStorage.setItem("push.endpoint", endpoint);
 }
 
 export async function getSubscription(): Promise<PushSubscription | null> {
