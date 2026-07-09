@@ -17,6 +17,7 @@ interface NotificationItem {
 const TYPE_MESSAGE: Record<string, string> = {
   ADMIN_COMMENT: "목회자 코멘트가 등록되었어요 😊",
   GATHERING_USER_CARD_UPDATED: "나의 소모임 정보가 업데이트 되었어요 😊",
+  JOIN_REQUEST: "교회 편입 요청이 왔어요 🎉",
 };
 
 function NotificationsPage() {
@@ -120,7 +121,7 @@ function NotificationsPage() {
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </div>
                   {showDescription && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="mt-0.5 whitespace-pre-line text-xs text-muted-foreground">
                       {item.description}
                     </p>
                   )}
@@ -145,7 +146,7 @@ function NotificationsPage() {
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </div>
                 {item.description && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="mt-0.5 whitespace-pre-line text-xs text-muted-foreground">
                     {item.description}
                   </p>
                 )}

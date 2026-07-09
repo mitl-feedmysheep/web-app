@@ -5,6 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   UserPen,
   KeyRound,
   Church,
@@ -32,6 +40,7 @@ function MyPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { isOpen: onboardingOpen, open: openOnboarding, close: closeOnboarding } = useOnboarding();
 
   useEffect(() => {
@@ -139,11 +148,28 @@ function MyPage() {
       <Button
         variant="ghost"
         className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-        onClick={handleLogout}
+        onClick={() => setShowLogoutDialog(true)}
       >
         <LogOut className="mr-2 h-4 w-4" />
         로그아웃
       </Button>
+
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent showCloseButton={false} className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>로그아웃</DialogTitle>
+            <DialogDescription>정말 로그아웃 하시겠습니까?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row justify-end gap-2 sm:flex-row">
+            <Button variant="outline" onClick={() => setShowLogoutDialog(false)}>
+              취소
+            </Button>
+            <Button variant="destructive" onClick={handleLogout}>
+              로그아웃
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <OnboardingModal isOpen={onboardingOpen} onClose={closeOnboarding} />
     </div>
