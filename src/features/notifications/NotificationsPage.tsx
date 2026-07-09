@@ -84,7 +84,7 @@ function NotificationsPage() {
       <div className="mb-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/", { replace: true }))}
           className="p-1 text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="h-5 w-5" />
