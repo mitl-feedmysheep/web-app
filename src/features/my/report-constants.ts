@@ -20,6 +20,18 @@ export const REPORT_STATUS_BADGE_CLASS: Record<ReportStatus, string> = {
   RESOLVED: "bg-primary/15 text-primary",
 };
 
+export const REPORT_TYPE_BADGE_CLASS: Record<ReportType, string> = {
+  BUG: "bg-red-100 text-red-700",
+  FEATURE_REQUEST: "bg-blue-100 text-blue-700",
+  QUESTION: "bg-emerald-100 text-emerald-700",
+};
+
+export const REPORT_TYPE_EMOJI: Record<ReportType, string> = {
+  BUG: "🐛",
+  FEATURE_REQUEST: "🆕",
+  QUESTION: "🙋‍♂️",
+};
+
 export const REPORT_STATUS_OPTIONS: ReportStatus[] = [
   "RECEIVED",
   "CONFIRMED",
@@ -32,3 +44,12 @@ export const REPORT_TYPE_OPTIONS: ReportType[] = [
   "FEATURE_REQUEST",
   "QUESTION",
 ];
+
+/**
+ * 백엔드가 LocalDateTime(UTC 저장)을 타임존 표기 없이 직렬화하므로,
+ * 브라우저가 이를 로컬 시간으로 오인하지 않도록 UTC로 명시해서 파싱한다.
+ */
+export function parseServerDate(value: string): Date {
+  const hasTimezone = /[Zz]|[+-]\d{2}:?\d{2}$/.test(value);
+  return new Date(hasTimezone ? value : `${value}Z`);
+}

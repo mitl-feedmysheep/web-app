@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Send } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -9,15 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { membersApi, reportsApi, ApiError } from "@/lib/api";
+import { membersApi, reportsApi, mediaApi, ApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import Lightbox from "@/components/Lightbox";
 import type { ReportDetail, ReportStatus } from "@/types";
 import {
   REPORT_STATUS_BADGE_CLASS,
   REPORT_STATUS_LABELS,
   REPORT_STATUS_OPTIONS,
+  REPORT_TYPE_BADGE_CLASS,
   REPORT_TYPE_LABELS,
+  parseServerDate,
 } from "./report-constants";
 
 function ReportDetailPage() {
@@ -31,6 +34,8 @@ function ReportDetailPage() {
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [statusSaving, setStatusSaving] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const loadDetail = async () => {
     if (!reportId) return;
@@ -92,6 +97,41 @@ function ReportDetailPage() {
     }
   };
 
+  const handleAddPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0 || !reportId) return;
+    const files = Array.from(fileList);
+    e.target.value = "";
+
+    setUploadingPhoto(true);
+    try {
+      for (const file of files) {
+        const { uploads } = await mediaApi.getPresignedUrls(
+          "REPORT",
+          reportId,
+          file.name,
+          file.type,
+          file.size
+        );
+        const mediumUpload = uploads.find((u) => u.mediaType === "MEDIUM");
+        if (!mediumUpload) continue;
+
+        await mediaApi.uploadFile(mediumUpload.uploadUrl, file);
+        await mediaApi.completeUpload("REPORT", reportId, [
+          { mediaType: mediumUpload.mediaType, publicUrl: mediumUpload.publicUrl },
+        ]);
+      }
+      await loadDetail();
+      toast.success("사진이 추가되었어요.");
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "사진 업로드에 실패했습니다."
+      );
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   if (loading || !detail) {
     return (
       <div className="flex min-h-dvh flex-col">
@@ -109,6 +149,7 @@ function ReportDetailPage() {
   }
 
   const isViewingOthersReport = isSystemAdmin && myMemberId !== detail.reporterId;
+  const isOwnReport = myMemberId !== null && myMemberId === detail.reporterId;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -127,12 +168,13 @@ function ReportDetailPage() {
       <div className="flex-1 space-y-1 overflow-y-auto px-4 py-5 pb-28">
         <div className="space-y-2 rounded-2xl border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-primary">
+            <Badge className={REPORT_TYPE_BADGE_CLASS[detail.type]}>
               {REPORT_TYPE_LABELS[detail.type]}
-            </span>
+            </Badge>
             {isSystemAdmin && (
               <span className="text-xs text-muted-foreground">
-                · {detail.reporterName}
+                {detail.reporterName}
+                {detail.reporterAffiliation && `(${detail.reporterAffiliation})`}
               </span>
             )}
           </div>
@@ -140,32 +182,67 @@ function ReportDetailPage() {
             {detail.content}
           </p>
 
-          {isViewingOthersReport && (
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center gap-2 rounded-xl bg-accent px-3 py-2">
-                <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-                  상태
-                </span>
-                <Select
-                  value={detail.status}
-                  onValueChange={(v) => handleStatusChange(v as ReportStatus)}
-                  disabled={statusSaving}
+          {(detail.mediaUrls.length > 0 || isOwnReport) && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {detail.mediaUrls.map((url, idx) => (
+                <button
+                  key={url}
+                  type="button"
+                  onClick={() => setPreviewIndex(idx)}
+                  className="block h-[4.4rem] w-[4.4rem] overflow-hidden rounded-lg border bg-secondary"
                 >
-                  <SelectTrigger size="sm" className="flex-1 bg-card">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {REPORT_STATUS_OPTIONS.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {REPORT_STATUS_LABELS[status]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <p className="px-1 text-xs text-muted-foreground">
-                상태만 바꾸면 알림이 가지 않아요. 답변을 남겨야 유저에게 푸시가 가요.
-              </p>
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    crossOrigin="anonymous"
+                  />
+                </button>
+              ))}
+              {isOwnReport && (
+                <label className="flex h-[4.4rem] w-[4.4rem] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border-[1.5px] border-dashed border-border text-muted-foreground">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleAddPhotos}
+                    disabled={uploadingPhoto}
+                  />
+                  {uploadingPhoto ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="mb-0.5 h-5 w-5" />
+                      <span className="text-[10px]">추가</span>
+                    </>
+                  )}
+                </label>
+              )}
+            </div>
+          )}
+
+          {isViewingOthersReport && (
+            <div className="flex items-center gap-2 rounded-xl bg-accent px-3 py-2">
+              <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                상태
+              </span>
+              <Select
+                value={detail.status}
+                onValueChange={(v) => handleStatusChange(v as ReportStatus)}
+                disabled={statusSaving}
+              >
+                <SelectTrigger size="sm" className="flex-1 bg-card">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPORT_STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {REPORT_STATUS_LABELS[status]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -193,7 +270,7 @@ function ReportDetailPage() {
                   {c.content}
                 </div>
                 <span className="mt-1 px-1 text-xs text-muted-foreground">
-                  {new Date(c.createdAt).toLocaleString("ko-KR", {
+                  {parseServerDate(c.createdAt).toLocaleString("ko-KR", {
                     month: "long",
                     day: "numeric",
                     hour: "numeric",
@@ -232,6 +309,14 @@ function ReportDetailPage() {
           )}
         </button>
       </div>
+
+      {previewIndex !== null && (
+        <Lightbox
+          images={detail.mediaUrls}
+          initialIndex={previewIndex}
+          onClose={() => setPreviewIndex(null)}
+        />
+      )}
     </div>
   );
 }

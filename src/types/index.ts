@@ -40,6 +40,7 @@ export interface ReportSummary {
   status: ReportStatus;
   content: string;
   reporterName: string;
+  reporterAffiliation?: string | null;
   createdAt: string;
 }
 
@@ -59,8 +60,10 @@ export interface ReportDetail {
   content: string;
   reporterId: string;
   reporterName: string;
+  reporterAffiliation?: string | null;
   createdAt: string;
   comments: ReportComment[];
+  mediaUrls: string[];
 }
 
 export interface Church {

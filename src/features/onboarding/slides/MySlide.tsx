@@ -20,6 +20,9 @@ const MENU_ITEMS = [
   { icon: KeyRound, label: "비밀번호 변경" },
   { icon: Church, label: "교회 전환" },
   { icon: Building2, label: "부서 전환" },
+  { icon: Bell, label: "알림 설정" },
+  { icon: MessageSquareWarning, label: "버그 신고 · 기능 요청 · 질문사항" },
+  { icon: CircleHelp, label: "앱 사용법 보기" },
 ];
 
 function MySlide() {
@@ -49,45 +52,16 @@ function MySlide() {
                   <div key={label}>
                     <button className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent">
                       <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
-                      <span className="flex-1 text-left text-sm font-medium">{label}</span>
+                      <span className="min-w-0 flex-1 text-left text-sm font-medium">{label}</span>
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </button>
-                    {index < MENU_ITEMS.length - 1 && <Separator className="mx-4" />}
+                    {index < MENU_ITEMS.length - 1 && (
+                      <div className="px-4">
+                        <Separator />
+                      </div>
+                    )}
                   </div>
                 ))}
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md shadow-primary/5">
-              <CardContent className="p-0">
-                <div className="flex w-full items-center gap-3 px-4 py-3.5">
-                  <Bell className="h-5 w-5 shrink-0 text-muted-foreground" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">알림 설정</p>
-                    <p className="text-xs text-muted-foreground">공지사항과 기도제목을 알림으로 받을 수 있어요.</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md shadow-primary/5">
-              <CardContent className="p-0">
-                <button className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent">
-                  <MessageSquareWarning className="h-5 w-5 shrink-0 text-muted-foreground" />
-                  <span className="flex-1 text-left text-sm font-medium">버그 신고 · 기능 요청</span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md shadow-primary/5">
-              <CardContent className="p-0">
-                <button className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent">
-                  <CircleHelp className="h-5 w-5 shrink-0 text-muted-foreground" />
-                  <span className="flex-1 text-left text-sm font-medium">앱 사용법 보기</span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                </button>
               </CardContent>
             </Card>
           </div>

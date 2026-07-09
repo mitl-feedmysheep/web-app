@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, MessageSquareWarning, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,9 @@ import {
   REPORT_STATUS_BADGE_CLASS,
   REPORT_STATUS_LABELS,
   REPORT_STATUS_OPTIONS,
+  REPORT_TYPE_BADGE_CLASS,
   REPORT_TYPE_LABELS,
+  parseServerDate,
 } from "./report-constants";
 
 function ReportListPage() {
@@ -31,7 +33,7 @@ function ReportListPage() {
   useEffect(() => {
     let cancelled = false;
     reportsApi
-      .getList(statusFilter ?? undefined)
+      .getList()
       .then((data) => {
         if (!cancelled) setReports(data);
       })
@@ -48,12 +50,23 @@ function ReportListPage() {
     return () => {
       cancelled = true;
     };
-  }, [statusFilter]);
+  }, []);
 
-  const handleFilterChange = (status: ReportStatus | null) => {
-    setLoading(true);
-    setStatusFilter(status);
-  };
+  const statusCounts = useMemo(() => {
+    const counts: Record<ReportStatus, number> = {
+      RECEIVED: 0,
+      CONFIRMED: 0,
+      IN_PROGRESS: 0,
+      RESOLVED: 0,
+    };
+    for (const report of reports) counts[report.status] += 1;
+    return counts;
+  }, [reports]);
+
+  const visibleReports = useMemo(
+    () => (statusFilter === null ? reports : reports.filter((r) => r.status === statusFilter)),
+    [reports, statusFilter]
+  );
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -72,26 +85,26 @@ function ReportListPage() {
             </p>
             <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4">
               <button
-                onClick={() => handleFilterChange(null)}
+                onClick={() => setStatusFilter(null)}
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold whitespace-nowrap ${
                   statusFilter === null
                     ? "border-foreground bg-foreground text-background"
                     : "border-border text-muted-foreground"
                 }`}
               >
-                전체
+                전체 ({reports.length})
               </button>
               {REPORT_STATUS_OPTIONS.map((status) => (
                 <button
                   key={status}
-                  onClick={() => handleFilterChange(status)}
+                  onClick={() => setStatusFilter(status)}
                   className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold whitespace-nowrap ${
                     statusFilter === status
                       ? "border-foreground bg-foreground text-background"
                       : "border-border text-muted-foreground"
                   }`}
                 >
-                  {REPORT_STATUS_LABELS[status]}
+                  {REPORT_STATUS_LABELS[status]} ({statusCounts[status]})
                 </button>
               ))}
             </div>
@@ -102,14 +115,14 @@ function ReportListPage() {
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
-        ) : reports.length === 0 ? (
+        ) : visibleReports.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-16 text-center text-muted-foreground">
             <MessageSquareWarning className="h-8 w-8" />
             <p className="text-sm">아직 남긴 리포트가 없어요.</p>
           </div>
         ) : (
           <div className="space-y-2.5">
-            {reports.map((report) => (
+            {visibleReports.map((report) => (
               <Card
                 key={report.id}
                 className="cursor-pointer border-0 shadow-md shadow-primary/5"
@@ -117,9 +130,9 @@ function ReportListPage() {
               >
                 <CardContent className="space-y-1.5 p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-primary">
+                    <Badge className={REPORT_TYPE_BADGE_CLASS[report.type]}>
                       {REPORT_TYPE_LABELS[report.type]}
-                    </span>
+                    </Badge>
                     <Badge className={REPORT_STATUS_BADGE_CLASS[report.status]}>
                       {REPORT_STATUS_LABELS[report.status]}
                     </Badge>
@@ -132,12 +145,13 @@ function ReportListPage() {
                       <>
                         <span className="font-semibold text-foreground">
                           {report.reporterName}
+                          {report.reporterAffiliation && `(${report.reporterAffiliation})`}
                         </span>
                         <span>·</span>
                       </>
                     )}
                     <span>
-                      {new Date(report.createdAt).toLocaleDateString("ko-KR")}
+                      {parseServerDate(report.createdAt).toLocaleDateString("ko-KR")}
                     </span>
                   </div>
                 </CardContent>

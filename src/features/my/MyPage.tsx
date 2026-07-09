@@ -30,13 +30,6 @@ import type { User } from "@/types";
 import OnboardingModal from "@/features/onboarding/OnboardingModal";
 import { useOnboarding } from "@/features/onboarding/useOnboarding";
 
-const MENU_ITEMS = [
-  { icon: UserPen, label: "내 정보 수정", path: "/my/account" },
-  { icon: KeyRound, label: "비밀번호 변경", path: "/my/password" },
-  { icon: Church, label: "교회 전환", path: "/select-church" },
-  { icon: Building2, label: "부서 전환", path: "/my/department" },
-] as const;
-
 function MyPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -77,6 +70,16 @@ function MyPage() {
     );
   }
 
+  const MENU_ITEMS = [
+    { icon: UserPen, label: "내 정보 수정", onClick: () => navigate("/my/account") },
+    { icon: KeyRound, label: "비밀번호 변경", onClick: () => navigate("/my/password") },
+    { icon: Church, label: "교회 전환", onClick: () => navigate("/select-church") },
+    { icon: Building2, label: "부서 전환", onClick: () => navigate("/my/department") },
+    { icon: Bell, label: "알림 설정", onClick: () => navigate("/my/notifications") },
+    { icon: MessageSquareWarning, label: "버그 신고 · 기능 요청 · 질문사항", onClick: () => navigate("/my/report") },
+    { icon: CircleHelp, label: "앱 사용법 보기", onClick: openOnboarding },
+  ];
+
   return (
     <div className="space-y-6 px-4 py-6">
       <section className="flex items-center gap-4">
@@ -100,64 +103,25 @@ function MyPage() {
 
       <Card className="border-0 shadow-md shadow-primary/5">
         <CardContent className="p-0">
-          {MENU_ITEMS.map(({ icon: Icon, label, path }, index) => (
-            <div key={path}>
+          {MENU_ITEMS.map(({ icon: Icon, label, onClick }, index) => (
+            <div key={label}>
               <button
-                onClick={() => navigate(path)}
+                onClick={onClick}
                 className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
               >
-                <Icon className="h-5 w-5 text-muted-foreground" />
-                <span className="flex-1 text-left text-sm font-medium">
+                <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 text-left text-sm font-medium">
                   {label}
                 </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
               </button>
               {index < MENU_ITEMS.length - 1 && (
-                <Separator className="mx-4" />
+                <div className="px-4">
+                  <Separator />
+                </div>
               )}
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-      <Card className="border-0 shadow-md shadow-primary/5">
-        <CardContent className="p-0">
-          <button
-            onClick={() => navigate("/my/notifications")}
-            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
-          >
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="flex-1 text-left text-sm font-medium">알림 설정</span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-        </CardContent>
-      </Card>
-
-      <Card className="border-0 shadow-md shadow-primary/5">
-        <CardContent className="p-0">
-          <button
-            onClick={() => navigate("/my/report")}
-            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
-          >
-            <MessageSquareWarning className="h-5 w-5 text-muted-foreground" />
-            <span className="flex-1 text-left text-sm font-medium">
-              버그 신고 · 기능 요청
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-        </CardContent>
-      </Card>
-
-      <Card className="border-0 shadow-md shadow-primary/5">
-        <CardContent className="p-0">
-          <button
-            onClick={openOnboarding}
-            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
-          >
-            <CircleHelp className="h-5 w-5 text-muted-foreground" />
-            <span className="flex-1 text-left text-sm font-medium">앱 사용법 보기</span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
         </CardContent>
       </Card>
 
