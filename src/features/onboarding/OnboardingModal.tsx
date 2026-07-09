@@ -208,7 +208,7 @@ function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   <div className={`absolute -bottom-2 h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-white ${tooltipArrow === "right" ? "right-8" : "left-8"}`} />
                 )}
                 <p
-                  className="text-sm leading-relaxed"
+                  className="whitespace-pre-line text-sm leading-relaxed"
                   style={{ fontFamily: "'Nanum Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif", fontWeight: 400, color: "#0f0f0f" }}
                 >
                   {tooltipText}

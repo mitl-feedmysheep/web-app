@@ -20,11 +20,9 @@ function HomeSlide({ section }: HomeSlideProps) {
                 className={`flex items-center gap-1${section === "header" ? " pt-0.5 pr-0.5" : ""}`}
                 {...(section === "header" ? { "data-highlight": "" } : {})}
               >
-                <button type="button" className="shrink-0 p-1.5 text-primary/70" data-reading-target="">
-                  <div className="relative inline-flex">
-                    <BookMarked className="h-5 w-5" />
-                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" style={{ zIndex: 120 }} />
-                  </div>
+                <button type="button" className="relative shrink-0 p-1.5 text-primary/70">
+                  <BookMarked className="h-5 w-5" />
+                  <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-red-500" style={{ zIndex: 120 }} />
                 </button>
                 <button type="button" className="relative shrink-0 p-1.5 text-primary/70" data-callout-target="">
                   <BookUser className="h-5 w-5" />
