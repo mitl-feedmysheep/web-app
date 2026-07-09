@@ -6,6 +6,7 @@ import GatheringSlide from "./slides/GatheringSlide";
 import PrayerSlide from "./slides/PrayerSlide";
 import SermonNotesSlide from "./slides/SermonNotesSlide";
 import MySlide from "./slides/MySlide";
+import ReportSlide from "./slides/ReportSlide";
 import OutroSlide from "./slides/OutroSlide";
 
 export interface FloatingBadge {
@@ -120,6 +121,15 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     hasHighlight: true,
     tooltipPosition: "bottom",
     tooltipText: "⚙️ 내 정보 수정, 교회/부서 전환, 알림 설정까지 MY 탭에서 모두 관리할 수 있어요",
+    activeTab: "/my",
+    activeTabLabel: "MY",
+  },
+  {
+    id: "report",
+    MockComponent: ReportSlide,
+    hasHighlight: true,
+    tooltipPosition: "top",
+    tooltipText: "🐛 버그를 발견했거나 원하는 기능이 있으면 언제든 여기서 남겨주세요. 질문도 좋아요 — 제가 직접 확인하고 답변해 드려요!",
     activeTab: "/my",
     activeTabLabel: "MY",
   },

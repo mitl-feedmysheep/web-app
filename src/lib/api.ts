@@ -17,6 +17,10 @@ import type {
   MemberSearchResult,
   MyReadingProgress,
   ReadingPlanDaySummary,
+  ReportDetail,
+  ReportStatus,
+  ReportSummary,
+  ReportType,
   SermonNote,
   SignupRequest,
   SignupResponse,
@@ -402,6 +406,32 @@ export const notificationsApi = {
 
   markAsRead: (id: string) =>
     authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),
+};
+
+export const reportsApi = {
+  create: (data: { type: ReportType; content: string }) =>
+    authedFetch<{ id: string }>("/reports", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  getList: (status?: ReportStatus) =>
+    authedFetch<ReportSummary[]>(status ? `/reports?status=${status}` : "/reports"),
+
+  getDetail: (reportId: string) =>
+    authedFetch<ReportDetail>(`/reports/${reportId}`),
+
+  addComment: (reportId: string, content: string) =>
+    authedFetch<void>(`/reports/${reportId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+
+  updateStatus: (reportId: string, status: ReportStatus) =>
+    authedFetch<void>(`/reports/${reportId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 };
 
 export const prayersApi = {

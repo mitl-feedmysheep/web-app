@@ -28,6 +28,39 @@ export interface User {
   baptismStatus?: "BAPTIZED" | "NOT_BAPTIZED" | "PAEDOBAPTISM" | null;
   mbti?: string;
   role?: string;
+  isSystemAdmin?: boolean;
+}
+
+export type ReportType = "BUG" | "FEATURE_REQUEST" | "QUESTION";
+export type ReportStatus = "RECEIVED" | "CONFIRMED" | "IN_PROGRESS" | "RESOLVED";
+
+export interface ReportSummary {
+  id: string;
+  type: ReportType;
+  status: ReportStatus;
+  content: string;
+  reporterName: string;
+  createdAt: string;
+}
+
+export interface ReportComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  content: string;
+  isMine: boolean;
+  createdAt: string;
+}
+
+export interface ReportDetail {
+  id: string;
+  type: ReportType;
+  status: ReportStatus;
+  content: string;
+  reporterId: string;
+  reporterName: string;
+  createdAt: string;
+  comments: ReportComment[];
 }
 
 export interface Church {

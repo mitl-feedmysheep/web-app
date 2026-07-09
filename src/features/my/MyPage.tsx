@@ -22,6 +22,7 @@ import {
   LogOut,
   Loader2,
   CircleHelp,
+  MessageSquareWarning,
 } from "lucide-react";
 import { authApi, membersApi } from "@/lib/api";
 import { unsubscribe as pushUnsubscribe } from "@/lib/push";
@@ -127,6 +128,21 @@ function MyPage() {
           >
             <Bell className="h-5 w-5 text-muted-foreground" />
             <span className="flex-1 text-left text-sm font-medium">알림 설정</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-md shadow-primary/5">
+        <CardContent className="p-0">
+          <button
+            onClick={() => navigate("/my/report")}
+            className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent"
+          >
+            <MessageSquareWarning className="h-5 w-5 text-muted-foreground" />
+            <span className="flex-1 text-left text-sm font-medium">
+              버그 신고 · 기능 요청
+            </span>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </CardContent>

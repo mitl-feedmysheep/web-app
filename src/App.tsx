@@ -21,6 +21,9 @@ import AccountPage from "@/features/my/AccountPage";
 import ChangePasswordPage from "@/features/my/ChangePasswordPage";
 import SelectDepartmentPage from "@/features/my/SelectDepartmentPage";
 import NotificationSettingsPage from "@/features/my/NotificationSettingsPage";
+import ReportListPage from "@/features/my/ReportListPage";
+import ReportCreatePage from "@/features/my/ReportCreatePage";
+import ReportDetailPage from "@/features/my/ReportDetailPage";
 import MessagesPage from "@/features/messages/MessagesPage";
 import NotificationsPage from "@/features/notifications/NotificationsPage";
 import GroupManagePage from "@/features/group/GroupManagePage";
@@ -90,6 +93,9 @@ function App() {
             <Route path="/my/password" element={<ChangePasswordPage />} />
             <Route path="/my/department" element={<SelectDepartmentPage />} />
             <Route path="/my/notifications" element={<NotificationSettingsPage />} />
+            <Route path="/my/report" element={<ReportListPage />} />
+            <Route path="/my/report/new" element={<ReportCreatePage />} />
+            <Route path="/my/report/:reportId" element={<ReportDetailPage />} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/announcements" element={<AnnouncementsPage />} />

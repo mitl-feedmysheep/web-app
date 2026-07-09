@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CircleHelp,
   LogOut,
+  MessageSquareWarning,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,6 +68,16 @@ function MySlide() {
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-md shadow-primary/5">
+              <CardContent className="p-0">
+                <button className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-accent">
+                  <MessageSquareWarning className="h-5 w-5 shrink-0 text-muted-foreground" />
+                  <span className="flex-1 text-left text-sm font-medium">버그 신고 · 기능 요청</span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </button>
               </CardContent>
             </Card>
 
