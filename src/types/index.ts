@@ -183,6 +183,7 @@ export interface JoinRequest {
   id: string;
   churchId: string;
   churchName: string;
+  departmentName: string | null;
   status: "PENDING" | "ACCEPTED" | "DECLINED";
   createdAt: string;
 }
