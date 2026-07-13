@@ -26,7 +26,11 @@ function ReportListPage() {
   useEffect(() => {
     membersApi
       .getMyInfo()
-      .then((me) => setIsSystemAdmin(!!me.isSystemAdmin))
+      .then((me) => {
+        const admin = !!me.isSystemAdmin;
+        setIsSystemAdmin(admin);
+        if (admin) setStatusFilter("RECEIVED");
+      })
       .catch(() => {});
   }, []);
 
@@ -74,7 +78,7 @@ function ReportListPage() {
         <button onClick={() => navigate("/my")} className="-ml-1 p-1">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-base font-semibold">버그 신고 · 기능 요청</h1>
+        <h1 className="text-base font-semibold">버그 신고 · 기능 요청 · 질문사항</h1>
       </header>
 
       <div className="flex-1 space-y-4 px-4 py-5">

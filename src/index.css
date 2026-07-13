@@ -93,6 +93,16 @@
   display: none;
 }
 
+/* iOS Safari의 네이티브 date/time input은 appearance: auto 상태에서
+   자체 내부 렌더링 폭을 가져서, 지정한 border box보다 오른쪽으로
+   살짝 삐져나오는 경우가 있음. appearance를 꺼서 CSS box model을
+   그대로 따르도록 강제 */
+input[type="date"],
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 @keyframes highlight-pulse {
   0% { background-color: transparent; }
   15% { background-color: oklch(0.596 0.145 163.225 / 0.18); }
