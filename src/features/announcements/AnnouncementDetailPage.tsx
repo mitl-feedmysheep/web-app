@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useNavigationType } from "react-router-dom";
 import { ArrowLeft, Loader2, Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { announcementsApi } from "@/lib/api";
 import type { AnnouncementItem } from "@/lib/api";
@@ -175,6 +175,7 @@ function Lightbox({
 function AnnouncementDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const [announcement, setAnnouncement] = useState<AnnouncementItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -211,7 +212,7 @@ function AnnouncementDetailPage() {
       <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border/40 bg-background/95 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => (navigationType === "PUSH" ? navigate(-1) : navigate("/", { replace: true }))}
           className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
