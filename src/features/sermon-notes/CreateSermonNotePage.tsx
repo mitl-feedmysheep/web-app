@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { SermonNoteEditor } from "@/components/ui/sermon-note-editor";
 import { sermonNotesApi, ApiError } from "@/lib/api";
 import { toast } from "sonner";
@@ -37,13 +38,18 @@ function CreateSermonNotePage() {
   const [serviceTypeSuggestions, setServiceTypeSuggestions] = useState<
     string[]
   >([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const serviceTypeRef = useRef<HTMLDivElement>(null);
+  const [preacherSuggestions, setPreacherSuggestions] = useState<string[]>(
+    []
+  );
 
   useEffect(() => {
     sermonNotesApi
       .getServiceTypes()
       .then(setServiceTypeSuggestions)
+      .catch(() => {});
+    sermonNotesApi
+      .getPreachers()
+      .then(setPreacherSuggestions)
       .catch(() => {});
   }, []);
 
@@ -76,24 +82,6 @@ function CreateSermonNotePage() {
     };
     load();
   }, [id, navigate]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        serviceTypeRef.current &&
-        !serviceTypeRef.current.contains(e.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const filteredSuggestions = serviceTypeSuggestions.filter(
-    (s) =>
-      s.toLowerCase().includes(serviceType.toLowerCase()) && s !== serviceType
-  );
 
   const canSubmit = title.trim() && sermonDate && !saving;
 
@@ -137,7 +125,7 @@ function CreateSermonNotePage() {
   }
 
   return (
-    <div className="min-h-dvh pb-8">
+    <div className="min-h-screen pb-8">
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-background/95 px-4 py-3 backdrop-blur-md">
         <button
@@ -202,44 +190,26 @@ function CreateSermonNotePage() {
             <label className="text-xs font-semibold text-muted-foreground">
               설교자
             </label>
-            <Input
+            <AutocompleteInput
               placeholder="목사님 이름"
               value={preacher}
-              onChange={(e) => setPreacher(e.target.value)}
+              onChange={setPreacher}
+              suggestions={preacherSuggestions}
               maxLength={50}
             />
           </div>
 
-          <div className="relative space-y-1.5" ref={serviceTypeRef}>
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground">
               예배 종류
             </label>
-            <Input
+            <AutocompleteInput
               placeholder="예: 주일 1부"
               value={serviceType}
-              onChange={(e) => {
-                setServiceType(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
+              onChange={setServiceType}
+              suggestions={serviceTypeSuggestions}
               maxLength={50}
             />
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-20 mt-1 rounded-lg border border-border bg-background shadow-md">
-                {filteredSuggestions.map((s) => (
-                  <button
-                    key={s}
-                    className="block w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent first:rounded-t-lg last:rounded-b-lg"
-                    onClick={() => {
-                      setServiceType(s);
-                      setShowSuggestions(false);
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 

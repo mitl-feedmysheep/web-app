@@ -25,6 +25,16 @@ export function convertKSTtoUTC(dateStr: string, timeStr: string): string {
   return kstDateTime.toISOString();
 }
 
+/** 저장 시 "- " 불릿만 있고 실제 내용이 없으면 빈 값으로 취급 */
+export function bulletTextValue(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const hasContent = trimmed
+    .split("\n")
+    .some((line) => line.replace(/^-\s?/, "").trim().length > 0);
+  return hasContent ? trimmed : null;
+}
+
 export function getWeekOfMonth(dateString: string): number {
   try {
     const date = new Date(dateString);

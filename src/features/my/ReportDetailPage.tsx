@@ -150,6 +150,8 @@ function ReportDetailPage() {
 
   const isViewingOthersReport = isSystemAdmin && myMemberId !== detail.reporterId;
   const isOwnReport = myMemberId !== null && myMemberId === detail.reporterId;
+  // 관리자는 자기 리포트든 남의 리포트든 상태를 바꿀 수 있음 (본인이 접수한 버그도 추적 가능해야 함)
+  const canChangeStatus = isSystemAdmin;
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -158,7 +160,7 @@ function ReportDetailPage() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="flex-1 text-base font-semibold">리포트</h1>
-        {!isViewingOthersReport && (
+        {!canChangeStatus && (
           <Badge className={REPORT_STATUS_BADGE_CLASS[detail.status]}>
             {REPORT_STATUS_LABELS[detail.status]}
           </Badge>
@@ -222,7 +224,7 @@ function ReportDetailPage() {
             </div>
           )}
 
-          {isViewingOthersReport && (
+          {canChangeStatus && (
             <div className="flex items-center gap-2 rounded-xl bg-accent px-3 py-2">
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">
                 상태

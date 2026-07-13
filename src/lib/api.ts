@@ -575,6 +575,9 @@ export const sermonNotesApi = {
   getServiceTypes: () =>
     authedFetch<string[]>("/sermon-notes/service-types"),
 
+  getPreachers: () =>
+    authedFetch<string[]>("/sermon-notes/preachers"),
+
   create: (data: CreateSermonNoteRequest) =>
     authedFetch<SermonNote>("/sermon-notes", {
       method: "POST",

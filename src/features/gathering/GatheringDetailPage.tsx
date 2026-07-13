@@ -24,6 +24,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { gatheringsApi, groupsApi, prayersApi, mediaApi, educationApi, ApiError } from "@/lib/api";
+import { BulletTextarea } from "@/components/BulletTextarea";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { convertKSTtoUTC, formatWeekFormat } from "@/lib/utils";
+import { convertKSTtoUTC, formatWeekFormat, bulletTextValue } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { GatheringDetail, GatheringMember, User, EducationProgram, EducationProgress } from "@/types";
@@ -820,7 +821,7 @@ function MemberCard({
             type === "worship" ? value : member.worshipAttendance,
           gatheringAttendance:
             type === "gathering" ? value : member.gatheringAttendance,
-          story: story.trim() || null,
+          story: bulletTextValue(story),
           goal: goal.trim() || null,
           prayers: buildPrayerPayload(),
         });
@@ -874,14 +875,14 @@ function MemberCard({
         {
           worshipAttendance: member.worshipAttendance,
           gatheringAttendance: member.gatheringAttendance,
-          story: story.trim() || null,
+          story: bulletTextValue(story),
           goal: goal.trim() || null,
           prayers: buildPrayerPayload(),
         }
       );
       onUpdate({
         ...member,
-        story: story.trim() || "",
+        story: bulletTextValue(story) ?? "",
         goal: res.goal ?? goal,
         prayers: res.prayers,
       });
@@ -1033,13 +1034,12 @@ function MemberCard({
                     <FileText className="h-3 w-3" />
                     나눔
                   </p>
-                  <textarea
+                  <BulletTextarea
                     value={story}
-                    onChange={(e) => setStory(e.target.value)}
+                    onChange={setStory}
                     placeholder="나눔 내용을 적어주세요."
                     rows={2}
                     maxLength={500}
-                    className="w-full resize-none overflow-y-auto rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   />
                 </div>
 
