@@ -406,6 +406,12 @@ export const notificationsApi = {
 
   markAsRead: (id: string) =>
     authedFetch<void>(`/notifications/${id}/read`, { method: "PATCH" }),
+
+  markAllAsReadByEntity: (entityType: string, entityId: string) =>
+    authedFetch<void>(
+      `/notifications/read-by-entity?entityType=${entityType}&entityId=${entityId}`,
+      { method: "PATCH" }
+    ),
 };
 
 export const reportsApi = {

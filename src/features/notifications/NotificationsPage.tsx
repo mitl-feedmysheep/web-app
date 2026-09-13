@@ -16,6 +16,7 @@ interface NotificationItem {
 
 const TYPE_MESSAGE: Record<string, string> = {
   ADMIN_COMMENT: "목회자 코멘트가 등록되었어요 😊",
+  LEADER_COMMENT: "리더 코멘트가 등록되었어요 😊",
   GATHERING_USER_CARD_UPDATED: "나의 소모임 정보가 업데이트 되었어요 😊",
   JOIN_REQUEST: "교회 편입 요청이 왔어요 🎉",
 };

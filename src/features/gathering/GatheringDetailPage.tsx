@@ -23,7 +23,7 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
-import { gatheringsApi, groupsApi, prayersApi, mediaApi, educationApi, ApiError } from "@/lib/api";
+import { gatheringsApi, groupsApi, prayersApi, mediaApi, educationApi, notificationsApi, ApiError } from "@/lib/api";
 import { BulletTextarea } from "@/components/BulletTextarea";
 import {
   Dialog,
@@ -119,6 +119,8 @@ function GatheringDetailPage() {
         ]);
         setGathering(detail);
         setMyInfo(me);
+        // 알림 목록을 거치지 않고 (푸시 클릭 등으로) 바로 들어와도 관련 알림을 읽음 처리
+        notificationsApi.markAllAsReadByEntity("GATHERING", gatheringId).catch(() => {});
         setMeetingForm({
           date: detail.date,
           place: detail.place || "",
