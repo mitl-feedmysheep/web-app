@@ -28,6 +28,7 @@ import type {
   UpdateSermonNoteRequest,
   User,
 } from "@/types";
+import { checkAndHandleJwtExpired } from "./auth-handler";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -62,12 +63,14 @@ async function authedFetch<T>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new ApiError(
+    const apiError = new ApiError(
       (errorData as Record<string, string>).message ||
         `HTTP ${response.status}`,
       response.status,
       errorData
     );
+    checkAndHandleJwtExpired(apiError);
+    throw apiError;
   }
 
   const text = await response.text();
