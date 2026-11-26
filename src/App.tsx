@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { pushApi } from "@/lib/api";
 import AppShell from "@/components/layout/AppShell";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SplashScreen from "@/features/auth/SplashScreen";
@@ -42,6 +43,28 @@ function isSplashEnabled(): boolean {
   return localStorage.getItem("splash.seen") !== "true";
 }
 
+/**
+ * 푸시 알림 URL의 `pd`(deliveryId) 쿼리를 읽어 클릭을 기록하고 주소에서 제거한다.
+ * 서비스워커의 클릭 수집이 누락되거나(구버전 SW, iOS) 실패한 경우를 보완한다.
+ */
+function PushClickTracker() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const deliveryId = params.get("pd");
+    if (!deliveryId) return;
+    pushApi.recordClick(deliveryId);
+    params.delete("pd");
+    const search = params.toString();
+    navigate(
+      { pathname: location.pathname, search: search ? `?${search}` : "", hash: location.hash },
+      { replace: true }
+    );
+  }, [location.search, location.pathname, location.hash, navigate]);
+  return null;
+}
+
 function SwNavigateHandler() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -68,6 +91,7 @@ function App() {
   return (
     <BrowserRouter>
       <SwNavigateHandler />
+      <PushClickTracker />
       <Routes>
         <Route element={<AppShell />}>
           {/* Public - Auth */}

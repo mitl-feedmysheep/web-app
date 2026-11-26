@@ -692,4 +692,11 @@ export const pushApi = {
 
   unsubscribeTopic: (topic: string) =>
     authedFetch<void>(`/push/topics/${topic}`, { method: "DELETE" }),
+
+  /** 푸시 알림 클릭 기록 (인증 불필요, 실패해도 무시). 서버는 최초 클릭만 반영한다. */
+  recordClick: (deliveryId: string) =>
+    fetch(`${API_BASE_URL}/push/deliveries/${encodeURIComponent(deliveryId)}/click`, {
+      method: "POST",
+      keepalive: true,
+    }).catch(() => undefined),
 };

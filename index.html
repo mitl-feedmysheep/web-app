@@ -38,7 +38,8 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {})
+          // api: 서비스워커가 푸시 클릭을 서버에 기록할 때 쓰는 API 주소 (빌드 시 Vite가 치환)
+          navigator.serviceWorker.register('/sw.js?api=' + encodeURIComponent('%VITE_API_BASE_URL%')).catch(() => {})
         })
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data && event.data.type === 'navigate' && event.data.url) {
