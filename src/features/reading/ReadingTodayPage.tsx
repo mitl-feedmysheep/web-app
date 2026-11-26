@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, BookMarked, Youtube, ChevronLeft, ChevronRight, CheckCircle2, Circle, Headphones, Video, ImageIcon, X, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import { readingApi } from "@/lib/api";
-import type { TodayReading } from "@/types";
+import type { TodayReading, MyReadingProgress } from "@/types";
 
 function MediaImage({ url }: { url: string }) {
   const [loaded, setLoaded] = useState(false);
@@ -74,6 +74,7 @@ export default function ReadingTodayPage() {
   const [toggling, setToggling] = useState(false);
   const [enabled, setEnabled] = useState(true);
   const [todayCount, setTodayCount] = useState<number | null>(null);
+  const [progress, setProgress] = useState<MyReadingProgress | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dateParam = searchParams.get("date");
@@ -94,6 +95,10 @@ export default function ReadingTodayPage() {
       ]);
       setReading(data);
       setTodayCount(count);
+      // 오늘 분량이 없으면 쉬는 날인지, 통독 일정이 끝났는지 구분하기 위해 진도 조회
+      if (!data && !dateParam) {
+        setProgress(await readingApi.getMyProgress(departmentId).catch(() => null));
+      }
     } catch {
       setReading(null);
     } finally {
@@ -153,6 +158,10 @@ export default function ReadingTodayPage() {
   }
 
   if (!reading) {
+    const totalDays = progress?.totalDays ?? 0;
+    const scheduledCount = progress?.scheduledDates.length ?? 0;
+    const isPlanFinished = !dateParam && totalDays > 0 && scheduledCount >= totalDays;
+    const missedCount = Math.max(scheduledCount - (progress?.completedCount ?? 0), 0);
     return (
       <div className="px-4 py-4">
         <div className="mb-4 flex items-center justify-between">
@@ -171,10 +180,31 @@ export default function ReadingTodayPage() {
             📊 내 진도 <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-2 text-center">
-          <BookMarked className="h-10 w-10 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">오늘의 읽기 분량이 없습니다.</p>
-        </div>
+        {isPlanFinished ? (
+          <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-3 text-center">
+            <span className="text-5xl">🎉</span>
+            <p className="text-base font-bold">통독 일정이 끝났어요!</p>
+            <p className="text-sm text-muted-foreground">
+              {missedCount > 0
+                ? <>아직 체크하지 않은 날이 <span className="font-semibold text-orange-500">{missedCount}일</span> 있어요.<br />놓친 날은 내 진도에서 읽고 체크할 수 있어요.</>
+                : <>모든 일차를 완독했어요. 수고 많으셨어요!</>}
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/reading/progress")}
+              className="mt-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground active:scale-95 transition-transform"
+            >
+              {missedCount > 0 ? "놓친 날 체크하러 가기" : "내 진도 보기"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-2 text-center">
+            <BookMarked className="h-10 w-10 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">
+              {!dateParam && progress ? "오늘은 쉬는 날이에요 🙌" : "오늘의 읽기 분량이 없습니다."}
+            </p>
+          </div>
+        )}
       </div>
     );
   }
