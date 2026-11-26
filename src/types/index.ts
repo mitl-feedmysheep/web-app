@@ -198,6 +198,9 @@ export interface MyPrayer {
   isAnswered: boolean;
   groupName: string | null;
   gatheringDate: string | null;
+  createdAt: string;
+  /** MY: 나의 기도(직접 작성), GATHERING: 모임 기도제목 */
+  source: "MY" | "GATHERING";
 }
 
 export interface SignupRequest {
@@ -266,9 +269,19 @@ export interface HomeSummaryPrayer {
   isAnswered: boolean;
 }
 
+export interface HomeMyPrayer {
+  id: string;
+  prayerRequest: string;
+  createdAt: string;
+}
+
 export interface HomeSummary {
   goals: HomeSummaryGoal[];
   prayers: HomeSummaryPrayer[];
+  /** 미응답 나의 기도 (최근순 최대 3개) */
+  myPrayers: HomeMyPrayer[];
+  /** 미응답 나의 기도 전체 개수 */
+  myPrayerCount: number;
 }
 
 export interface Department {

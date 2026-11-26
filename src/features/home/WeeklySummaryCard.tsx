@@ -53,13 +53,16 @@ export default function WeeklySummaryCard({ goals, prayers }: WeeklySummaryCardP
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <HandHeart className="h-3.5 w-3.5" />
-              <span>기도제목</span>
+              <span>모임 기도제목</span>
             </div>
             <ul className="space-y-1">
               {activePrayers.map((p, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                  <span>{p.prayerRequest}</span>
+                  <span className="min-w-0 flex-1">{p.prayerRequest}</span>
+                  {p.groupName && (
+                    <span className="mt-0.5 shrink-0 text-[11px] text-muted-foreground">{p.groupName}</span>
+                  )}
                 </li>
               ))}
             </ul>

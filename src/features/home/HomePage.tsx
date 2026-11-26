@@ -4,6 +4,7 @@ import { Cake, Loader2, MessageSquareHeart, Mail, Bell, BookUser, Megaphone, Che
 import { membersApi, departmentsApi, messagesApi, notificationsApi, announcementsApi, readingApi, type AnnouncementItem } from "@/lib/api";
 import type { User, HomeSummary } from "@/types";
 import WeeklySummaryCard from "./WeeklySummaryCard";
+import MyPrayerCard, { MyPrayerEmptyCard } from "./MyPrayerCard";
 import SendMessageModal from "./SendMessageModal";
 import MemberSearchModal from "./MemberSearchModal";
 import MiniCalendar from "./MiniCalendar";
@@ -13,6 +14,11 @@ interface BirthdayMember {
   name: string;
   birthday: string;
   sex: "M" | "F" | null;
+}
+
+/** WeeklySummaryCard가 실제로 그려지는지 (목표 또는 미응답 모임 기도제목) */
+function hasWeeklyContent(summary: HomeSummary): boolean {
+  return summary.goals.length > 0 || summary.prayers.some((p) => !p.isAnswered);
 }
 
 function HomePage() {
@@ -191,15 +197,25 @@ function HomePage() {
             </button>
           </div>
         </div>
-        {homeSummary && (homeSummary.goals.length > 0 || homeSummary.prayers.length > 0) ? (
+        {homeSummary && homeSummary.myPrayers?.length > 0 && (
+          <div className="mt-2">
+            <MyPrayerCard prayers={homeSummary.myPrayers} totalCount={homeSummary.myPrayerCount} />
+          </div>
+        )}
+        {homeSummary && hasWeeklyContent(homeSummary) ? (
           <div className="mt-2">
             <WeeklySummaryCard goals={homeSummary.goals} prayers={homeSummary.prayers} />
           </div>
-        ) : (
+        ) : homeSummary && !(homeSummary.myPrayers?.length > 0) ? (
+          // 이번 주 모임 기도제목/목표도, 나의 기도도 없을 때만 "적어볼까요"
+          <div className="mt-2">
+            <MyPrayerEmptyCard />
+          </div>
+        ) : !homeSummary ? (
           <p className="mt-1 text-sm text-muted-foreground">
             오늘도 하나님의 은혜 안에서 좋은 하루 되세요
           </p>
-        )}
+        ) : null}
       </section>
 
       {thisWeekBulletin && (

@@ -34,6 +34,8 @@ const HomeHeaderSlide = () => HomeSlide({ section: "header" });
 const HomeSummarySlide = () => HomeSlide({ section: "summary" });
 const HomeAnnouncementSlide = () => HomeSlide({ section: "announcement" });
 const HomeBirthdaySlide = () => HomeSlide({ section: "birthday" });
+const PrayerListSlide = () => PrayerSlide({ section: "list" });
+const PrayerWriteSlide = () => PrayerSlide({ section: "write" });
 
 export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
   {
@@ -56,7 +58,7 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
     MockComponent: HomeSummarySlide,
     hasHighlight: true,
     tooltipPosition: "bottom",
-    tooltipText: "📋 홈에서는 이번 주 소그룹에서 나눈 나의 한 주 목표와 기도제목을 확인할 수 있어요",
+    tooltipText: "📋 홈에서는 내가 쓴 나의 기도와, 이번 주 소그룹에서 나눈 한 주 목표·기도제목을 확인할 수 있어요",
     activeTab: "/",
     activeTabLabel: "홈",
   },
@@ -98,10 +100,19 @@ export const ONBOARDING_SLIDES: OnboardingSlideData[] = [
   },
   {
     id: "prayer",
-    MockComponent: PrayerSlide,
+    MockComponent: PrayerListSlide,
     hasHighlight: true,
     tooltipPosition: "bottom",
     tooltipText: "🙏 나의 모든 기도제목을 모아볼 수 있어요. 응답된 기도를 돌아보며 하나님의 역사하심과 발자취를 느껴보아요",
+    activeTab: "/prayers",
+    activeTabLabel: "기도",
+  },
+  {
+    id: "prayer-write",
+    MockComponent: PrayerWriteSlide,
+    hasHighlight: true,
+    tooltipPosition: "bottom",
+    tooltipText: "✍️ 모임과 상관없이 나만의 기도제목을 직접 적을 수 있어요. 나만 볼 수 있고, 매일 아침 기도 알림으로도 받아볼 수 있어요",
     activeTab: "/prayers",
     activeTabLabel: "기도",
   },

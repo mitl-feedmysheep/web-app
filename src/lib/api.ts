@@ -27,6 +27,7 @@ import type {
   TodayReading,
   UpdateSermonNoteRequest,
   User,
+  MyPrayer,
 } from "@/types";
 import { checkAndHandleJwtExpired } from "./auth-handler";
 
@@ -444,17 +445,21 @@ export const reportsApi = {
 };
 
 export const prayersApi = {
-  getMyPrayers: () =>
-    authedFetch<
-      Array<{
-        id: string;
-        prayerRequest: string;
-        description: string | null;
-        isAnswered: boolean;
-        groupName: string | null;
-        gatheringDate: string | null;
-      }>
-    >("/prayers/me"),
+  getMyPrayers: () => authedFetch<MyPrayer[]>("/prayers/me"),
+
+  /** 나의 기도 작성 (모임과 무관, 본인만 열람) */
+  create: (prayerRequest: string) =>
+    authedFetch<{ id: string }>("/prayers", {
+      method: "POST",
+      body: JSON.stringify({ prayerRequest }),
+    }),
+
+  /** 나의 기도 내용 수정 */
+  update: (prayerId: string, prayerRequest: string) =>
+    authedFetch<void>(`/prayers/${prayerId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ prayerRequest }),
+    }),
 
   updateAnswered: (prayerId: string, isAnswered: boolean) =>
     authedFetch<void>(`/prayers/${prayerId}/answered`, {

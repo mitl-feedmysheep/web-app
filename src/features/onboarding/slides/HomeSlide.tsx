@@ -1,4 +1,4 @@
-import { BookUser, BookMarked, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart, Megaphone, ChevronRight } from "lucide-react";
+import { BookUser, BookMarked, Bell, Mail, Target, HandHeart, Cake, MessageSquareHeart, Megaphone, ChevronRight, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MockBottomNav from "../MockBottomNav";
 
@@ -38,6 +38,27 @@ function HomeSlide({ section }: HomeSlideProps) {
               </div>
             </div>
             <div className="mt-2">
+              <Card className="gap-1 border-primary/20 py-2.5">
+                <CardHeader className="flex flex-row items-center justify-between px-3">
+                  <CardTitle className="flex items-center gap-1.5 text-sm font-semibold">
+                    <HandHeart className="h-4 w-4 text-primary" />
+                    나의 기도
+                  </CardTitle>
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent className="px-3">
+                  <ul className="space-y-1">
+                    {["동생이 다시 교회에 나올 수 있도록", "매일 말씀 읽는 습관"].map((p) => (
+                      <li key={p} className="flex items-start gap-2 text-sm">
+                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="mt-2">
               <Card className="border-primary/20 bg-primary/5 gap-1 py-2.5">
                 <CardHeader className="px-3">
                   <CardTitle className="flex items-baseline gap-2 text-sm font-semibold">
@@ -63,12 +84,13 @@ function HomeSlide({ section }: HomeSlideProps) {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                       <HandHeart className="h-3.5 w-3.5" />
-                      <span>기도제목</span>
+                      <span>모임 기도제목</span>
                     </div>
                     <ul className="space-y-1">
                       <li className="flex items-start gap-2 text-sm">
                         <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                        <span>부모님의 건강 회복을 위해</span>
+                        <span className="min-w-0 flex-1">부모님의 건강 회복을 위해</span>
+                        <span className="mt-0.5 shrink-0 text-[11px] text-muted-foreground">1목장</span>
                       </li>
                     </ul>
                   </div>
